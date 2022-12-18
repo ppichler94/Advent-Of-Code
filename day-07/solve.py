@@ -89,20 +89,20 @@ def calculate_sizes(direcotry, sizes):
 
 def solve_b(input):
     root = parse_commands(input)
-    sizes = []
-    calculate_sizes(root, sizes)
     required_size = 30000000 - (70000000 - root.size())
-    result = {"size": root.size()}
-    find_dir_to_delete(required_size, root, result)
-    return result["size"]
+    result = find_dir_to_delete(required_size, root, root.size())
+    return result
 
 
-def find_dir_to_delete(required_size, directory, result):
-    direcotry_size = directory.size()
-    if direcotry_size >= required_size and direcotry_size < result["size"]:
-        result["size"] = direcotry_size
+def find_dir_to_delete(required_size, directory, size):
     for d in directory.directories:
-        find_dir_to_delete(required_size, d, result)
+        result = find_dir_to_delete(required_size, d, size)
+        if result >= required_size and result < size:
+            return result
+    direcotry_size = directory.size()
+    if direcotry_size >= required_size and direcotry_size < size:
+        return direcotry_size
+    return size
 
 
 if __name__ == "__main__":
