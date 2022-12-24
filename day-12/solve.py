@@ -21,6 +21,7 @@ def read_input_from_file(file_name):
 
 def solve_a(input):
     data, start, end = parse_input(input)
+    start = [[start[0], start[1], -1]]
     distance = run_steps(data, start, end)
     return distance
 
@@ -45,7 +46,6 @@ def parse_input(input):
 
 
 def run_steps(data, start, end):
-
     def visit(x, y, distance):
         if distance + 1 < distance_map[x, y]:
             distance_map[x, y] = distance + 1
@@ -54,8 +54,7 @@ def run_steps(data, start, end):
         to_visit.extend(possible_movements)
 
     distance_map = np.full(data.shape, data.shape[0] * data.shape[1]+ 1, dtype=int)
-    distance_map[start[0], start[1]] = 0
-    to_visit = [[0, 0, -1]]
+    to_visit = start
     while len(to_visit) > 0:
         [new_x, new_y, previous_distance] = to_visit.pop(0)
         visit(new_x, new_y, previous_distance)
@@ -77,7 +76,11 @@ def get_possible_movements(data, x, y, distance, distance_map):
 
 
 def solve_b(input):
-    return
+    data, _, end = parse_input(input)
+    start_points = np.argwhere(data == 0)
+    start = [[x, y, -1] for [x, y] in start_points]
+    distance = run_steps(data, start, end)
+    return distance
 
 
 if __name__ == "__main__":
