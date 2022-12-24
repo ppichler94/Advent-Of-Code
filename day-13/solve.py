@@ -1,3 +1,5 @@
+import copy
+
 from numpy import sign
 
 def main():
@@ -22,7 +24,7 @@ def solve_a(input):
     packet_pairs = parse_input(input)
     result = 0
     for index, [packet1, packet2] in enumerate(packet_pairs):
-        comparison_result = compare_lists(packet1, packet2, 0)
+        comparison_result = compare_lists(packet1, packet2)
         if comparison_result == -1:
             result += (index + 1)
     return result
@@ -37,7 +39,7 @@ def parse_input(input):
     return pairs
 
 
-def compare_lists(list1, list2, offset):
+def compare_lists(list1, list2):
     while 1:
         if len(list1) == 0 and len(list2) == 0:
             return 0
@@ -47,25 +49,40 @@ def compare_lists(list1, list2, offset):
             return 1
         data1 = list1.pop(0)
         data2 = list2.pop(0)
-        result = compare(data1, data2, offset + 2)
+        result = compare(data1, data2)
         if result != 0:
             return result
 
 
-def compare(data1, data2, offset):
+def compare(data1, data2):
     if type(data1) == list and type(data2) == list:
-        return compare_lists(data1, data2, offset + 2)
+        return compare_lists(data1, data2)
     if type(data1) == int and type(data2) == int:
         return sign(data1 - data2)
     if type(data1) != list:
         data1 = [data1]
     if type(data2) != list:
         data2 = [data2]
-    return compare_lists(data1, data2, offset + 2)
+    return compare_lists(data1, data2)
 
 
 def solve_b(input):
-    return
+    packets = parse_input(input)
+    packets = [item for pair in packets for item in pair]
+    sorted_packets = [[[2]], [[6]]]
+    while len(packets) > 0:
+        packet = packets.pop(0)
+        for i in range(len(sorted_packets)):
+            if compare_lists(copy.deepcopy(packet), copy.deepcopy(sorted_packets[i])) == -1:
+                sorted_packets.insert(i, packet)
+                packet = None
+                break
+        if packet:
+            sorted_packets.append(packet)
+
+    marker1 = sorted_packets.index([[2]]) + 1
+    marker2 = sorted_packets.index([[6]]) + 1
+    return marker1 * marker2
 
 
 if __name__ == "__main__":
