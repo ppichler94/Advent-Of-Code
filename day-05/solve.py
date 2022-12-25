@@ -3,8 +3,8 @@ import re
 
 
 def main():
-    example_data = read_input_from_file("day-05/example.txt")
-    input_data = read_input_from_file("day-05/input.txt")
+    example_data = read_input_from_file("example.txt")
+    input_data = read_input_from_file("input.txt")
 
     print(f'Result example A: {solve(example_data, crate_mover_9000)}\n')
     print(f'Result puzzle data A: {solve(input_data, crate_mover_9000)}\n')
@@ -30,7 +30,7 @@ def solve(input, crate_mover):
 
 
 def parse_stacks(input):
-    stacks = ["" for i in range(int(len(input[0]) / 4))]
+    stacks = ["" for _ in range(int(len(input[0]) / 4))]
     for line in input:
         for i in range(len(line)):
             if ord(line[i]) >= ord("A") and ord(line[i]) <= ord("Z"):
@@ -51,7 +51,7 @@ def parse_commands(input):
 
 def crate_mover_9000(stacks, commands):
     for command in commands:
-        for i in range(command.count):
+        for _ in range(command.count):
             stacks[command.destination] += stacks[command.origin][-1]
             stacks[command.origin] = stacks[command.origin][:-1]
 

@@ -1,6 +1,6 @@
 def main():
-    example_data = read_input_from_file("day-10/example.txt")
-    input_data = read_input_from_file("day-10/input.txt")
+    example_data = read_input_from_file("example.txt")
+    input_data = read_input_from_file("input.txt")
 
     print(f'Result example A: {solve_a(example_data)}\n')
     print(f'Result puzzle data A: {solve_a(input_data)}\n')
@@ -40,7 +40,7 @@ def execute_instruction(state, instruction, handle_cycle):
 
 
 def handle_cycle_a(state, count):
-    for i in range(count):
+    for _ in range(count):
         if is_interesting(state["cycle"]):
             state["result"] += state["cycle"] * state["x"]
         state["cycle"] += 1
@@ -62,11 +62,10 @@ def solve_b(input):
     for l in state["crt"]:
         print(l)
     print("\n")
-    return
 
 
 def handle_cycle_b(state, count):
-    for i in range(count):
+    for _ in range(count):
         line = (state["cycle"] - 1) // 40
         column = (state["cycle"] - 1) % 40
         if column == 0:

@@ -2,8 +2,8 @@ import numpy as np
 
 
 def main():
-    example_data = read_input_from_file("day-09/example.txt")
-    input_data = read_input_from_file("day-09/input.txt")
+    example_data = read_input_from_file("example.txt")
+    input_data = read_input_from_file("input.txt")
 
     print(f'Result example A: {solve_a(example_data)}\n')
     print(f'Result puzzle data A: {solve_a(input_data)}\n')
@@ -32,7 +32,7 @@ def execute_motion(motion, visited, head_pos, tail_pos):
     motion_parts = motion.split(" ")
     direction = motion_parts[0]
     count = int(motion_parts[1])
-    for i in range(count):
+    for _ in range(count):
         execute_step(direction, visited, head_pos, tail_pos)
 
 
@@ -65,7 +65,7 @@ def update_tail_pos(head_pos, tail_pos):
 def solve_b(input):
     visited = set()
     head_pos = np.zeros(2, dtype=int)
-    knots = [np.zeros(2, dtype=int) for i in range(9)]
+    knots = [np.zeros(2, dtype=int) for _ in range(9)]
     for line in input:
         execute_motion_b(line, visited, head_pos, knots)
     return len(visited)
@@ -75,7 +75,7 @@ def execute_motion_b(motion, visited, head_pos, knots):
     motion_parts = motion.split(" ")
     direction = motion_parts[0]
     count = int(motion_parts[1])
-    for i in range(count):
+    for _ in range(count):
         execute_step_b(direction, visited, head_pos, knots)
 
 

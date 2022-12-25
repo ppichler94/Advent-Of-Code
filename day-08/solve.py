@@ -1,8 +1,8 @@
 import numpy as np
 
 def main():
-    example_data = read_input_from_file("day-08/example.txt")
-    input_data = read_input_from_file("day-08/input.txt")
+    example_data = read_input_from_file("example.txt")
+    input_data = read_input_from_file("input.txt")
 
     print(f'Result example A: {solve_a(example_data)}\n')
     print(f'Result puzzle data A: {solve_a(input_data)}\n')
