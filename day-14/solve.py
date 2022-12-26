@@ -67,7 +67,13 @@ def add_sand(cave, max_y):
 
 
 def solve_b(input):
-    return
+    cave, max_y = parse_input(input)
+    cave[max_y + 2, 0:1000] = 1
+    while 1:
+        add_sand(cave, max_y + 3)
+        if cave[0, 500] == 2:
+            break
+    return np.count_nonzero(cave == 2)
 
 
 if __name__ == "__main__":
