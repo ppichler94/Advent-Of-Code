@@ -1,44 +1,59 @@
-def main():
-    example_data = read_input_from_file("example.txt")
-    input_data = read_input_from_file("input.txt")
+import re
 
-    print(f'Result example A: {solve_a(example_data)}\n')
-    print(f'Result puzzle data A: {solve_a(input_data)}\n')
-    print(f'Result example B: {solve_b(example_data)}\n')
-    print(f'Result puzzle data B: {solve_b(input_data)}\n')
+from mylib.aoc_basics import Day
 
 
-def read_input_from_file(file_name):
-    input_file = open(file_name, "r")
-    data = input_file.readlines()
-    data = [x.strip() for x in data]
-    input_file.close()
-    return data
+class PartA(Day):
+    def parse(self, text, data):
+        data.calories_per_elf = [sum(int(i) for i in re.findall("\d+", block)) for block in text.split("\n\n")]
+
+    def compute(self, data):
+        return max(data.calories_per_elf)
+
+    def tests(self):
+        yield self.test_solve('''
+1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000
+        '''), 24000, "example"
 
 
-def solve_a(input):
-    calories_per_elf = calculate_calories_per_elf(input)
-    return max(calories_per_elf)
+class PartB(Day):
 
+    def parse(self, text, data):
+        data.calories_per_elf = [sum(int(i) for i in re.findall("\d+", block)) for block in text.split("\n\n")]
 
-def solve_b(input):
-    calories_per_elf = calculate_calories_per_elf(input)
-    calories_per_elf = sorted(calories_per_elf)
-    return sum(calories_per_elf[-3:])
+    def compute(self, data):
+        calories_per_elf = sorted(data.calories_per_elf)
+        return sum(calories_per_elf[-3:])
 
+    def tests(self):
+        yield self.test_solve('''
+1000
+2000
+3000
 
-def calculate_calories_per_elf(input):
-    calories_per_elf = []
-    accumulator = 0
-    for item in input:
-        if not item:
-            calories_per_elf.append(accumulator)
-            accumulator = 0
-        else:
-            accumulator += int(item)
-    calories_per_elf.append(accumulator)
-    return calories_per_elf
+4000
 
+5000
+6000
 
-if __name__ == "__main__":
-    main()
+7000
+8000
+9000
+
+10000
+        '''), 45000, "example"
+
+Day.do_day(1, 2022, PartA, PartB)
