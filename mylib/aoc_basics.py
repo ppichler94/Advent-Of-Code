@@ -71,32 +71,39 @@ class Day:
     def test_solve(self, test_text, config=None):
         data = Something()
         data.config = config
-        print("Parse input")
         self.parse(test_text.strip("\n"), data)
-        print("Config")
         self.part_config(data)
-        print("Compute")
         result = self.compute(data)
         return result
 
-    def test(self):
+    def test(self, puzzle):
+        print("Starting test...")
+        t = timeit.default_timer()
+        passed_tests = 0
+        tests = [(puzzle.example_data, self.example_answer(), "Example")]
+        tests.extend(self.tests())
+        for text, result_ok, *more in tests:
+            passed = self.execute_test(text, result_ok, more)
+            if passed:
+                passed_tests += 1
+        print(f"Testing finished after {timeit.default_timer() - t:.2f}s")
+        print(f"{passed_tests} of {len(tests)} passed")
+        print("")
+        return passed_tests == len(tests)
+
+    def execute_test(self, text, result_ok, more):
         green = "\033[0;32m"
         red = "\033[0;31m"
         default = "\033[00m"
-        print("Starting test...")
-        t = timeit.default_timer()
-        all_ok = True
-        for result, result_ok, *more in self.tests():
-            test_name = "" if len(more) == 0 else f"'{more[0]}'"
-            if result == result_ok:
-                print(f"  {green}>>{default} Test {test_name} {green}OK{default}  Result: {result}")
-            else:
-                print(f"  {red}>>{default}  Test {test_name} {red}Failed{default}")
-                print(f"  !! Expected {result_ok} but got {result}")
-                all_ok = False
-        print(f"Testing finished after {timeit.default_timer() - t:.2f}s")
-        print("")
-        return all_ok
+        test_name = "" if len(more) == 0 else f"'{more[0]}'"
+        result = self.test_solve(text)
+        if result == result_ok or not result_ok:
+            print(f"  {green}>>{default} Test {test_name} {green}OK{default}  Result: {result}")
+            return True
+        else:
+            print(f"  {red}>>{default}  Test {test_name} {red}Failed{default}")
+            print(f"  !! Expected {result_ok} but got {result}")
+            return False
 
     def do_solve(self, puzzle_text):
         print("Starting to solve...")
@@ -112,13 +119,16 @@ class Day:
         print(f"Finished solving after {timeit.default_timer() - t:.2f}s")
         return result
 
-    def do_part(self, puzzle):
+    def do_part(self, puzzle: Puzzle):
         print(f"-------------------- starting {self.answer_name()} --------------------")
-        if self.test():
+        if self.test(puzzle):
             text = puzzle.input_data
             result = self.do_solve(text)
             submit(puzzle, self.answer_name(), result)
         print()
+
+    def example_answer(self):
+        return None
 
     @staticmethod
     def do_day(day, year, part_a, part_b):

@@ -37,8 +37,8 @@ class PartA(Day):
             if traversal.depth == time_limit or not closed:
                 return data.max_flow_rate * time_limit - traversal.distance
 
-    def tests(self):
-        yield self.test_solve(example), 1651, "example"
+    def example_answer(self):
+        return 1651
 
 
 class PartB(PartA):
@@ -64,8 +64,8 @@ class PartB(PartA):
             if traversal.depth == time_limit or not closed:
                 return data.max_flow_rate * time_limit - traversal.distance
 
-    def tests(self):
-        yield self.test_solve(example), 1707, "example"
+    def example_answer(self):
+        return 1707
 
 
 example = ''''
