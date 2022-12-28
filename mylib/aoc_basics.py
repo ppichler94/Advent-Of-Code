@@ -4,6 +4,10 @@ from aocd.models import Puzzle
 
 
 def submit(puzzle: Puzzle, answer, value):
+    green = "\033[0;32m"
+    red = "\033[0;31m"
+    default = "\033[00m"
+
     print()
     print("  >>", answer, ": ", value)
     if answer not in ("answer_a", "answer_b"):
@@ -20,17 +24,17 @@ def submit(puzzle: Puzzle, answer, value):
 
     if answer == "answer_a" and puzzle.answered_a:
         if value_str == puzzle.answer_a:
-            print("  >> Ok (Already answered, values match)")
+            print(f"{green}  >> Ok {default}(Already answered, values match)")
         else:
-            print("  >> Value differs from previous: ", puzzle.answer_a)
+            print(f"{red}  >> Fail {default}Value differs from previous: ", puzzle.answer_a)
         return
 
 
     if answer == "answer_b" and puzzle.answered_b:
         if value_str == puzzle.answer_b:
-            print("  >> Ok (Already answered, values match)")
+            print(f"{green}  >> Ok {default}(Already answered, values match)")
         else:
-            print("  >> Value differs from previous: ", puzzle.answer_b)
+            print(f"{red}  >> Fail {default}Value differs from previous: ", puzzle.answer_b)
         return
 
     print("Submit answer? (y/n)")
@@ -76,15 +80,18 @@ class Day:
         return result
 
     def test(self):
+        green = "\033[0;32m"
+        red = "\033[0;31m"
+        default = "\033[00m"
         print("Starting test...")
         t = timeit.default_timer()
         all_ok = True
         for result, result_ok, *more in self.tests():
             test_name = "" if len(more) == 0 else f"'{more[0]}'"
             if result == result_ok:
-                print(f"  >> Test {test_name} OK  Result: {result}")
+                print(f"  {green}>>{default} Test {test_name} {green}OK{default}  Result: {result}")
             else:
-                print(f"  >> Test {test_name} Failed")
+                print(f"  {red}>>{default}  Test {test_name} {red}Failed{default}")
                 print(f"  !! Expected {result_ok} but got {result}")
                 all_ok = False
         print(f"Testing finished after {timeit.default_timer() - t:.2f}s")
