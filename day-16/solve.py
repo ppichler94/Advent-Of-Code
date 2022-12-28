@@ -1,8 +1,8 @@
-import copy
+import itertools
 import re
 from collections import namedtuple
-from functools import lru_cache
 from mylib.aoc_basics import Day
+import nographs as nog
 
 Valve = namedtuple("Valve", ["name", "flow_rate", "links"])
 
@@ -15,56 +15,54 @@ class PartA(Day):
             if matcher:
                 name = matcher.group(1)
                 data.valves[name] = Valve(name, int(matcher.group(2)), matcher.group(3).split(", "))
+        data.valves_to_open = frozenset(v.name for v in data.valves.values() if v.flow_rate > 0)
+        data.max_flow_rate = sum(v.flow_rate for v in data.valves.values())
+
+        def next_edges(state, _):
+            valve, closed, flow_rate = state
+            if valve in closed:
+                yield (valve, closed.difference([valve]), flow_rate + data.valves[valve].flow_rate), data.max_flow_rate - flow_rate
+            for target in data.valves[valve].links:
+                yield (target, closed, flow_rate), data.max_flow_rate - flow_rate
+
+        data.next_edges = next_edges
 
     def compute(self, data):
-        current_position = "AA"
-        valve_map = dict()
-        valve_map[current_position] = self.find_path(data.valves, current_position)
-        for valve in [v.name for v in data.valves.values() if v.flow_rate > 0 and v.name]:
-            valve_map[valve] = self.find_path(data.valves, valve)
+        start_valve = "AA"
+        time_limit = 30
 
-        total_flow = self.find_solution(data.valves, [], current_position, 30, valve_map)
-        return total_flow
-
-    def find_solution(self, valves, open_valves, current_position, remaining_time, valve_map):
-        current_flow_rate = 0
-
-        if valves[current_position].flow_rate > 0:
-            remaining_time -= 1
-            current_flow_rate = valves[current_position].flow_rate * remaining_time
-            open_valves.append(current_position)
-
-        possible_next_valves = [v.name for v in valves.values() if v.flow_rate > 0 and v.name not in open_valves]
-        if len(possible_next_valves) == 0:
-            return current_flow_rate
-
-        flow_rate = 0
-        for next_valve in possible_next_valves:
-            path_length = valve_map[current_position][next_valve]
-            if path_length >= remaining_time:
-                continue
-            flow_rate = max(self.find_solution(valves, list(open_valves), next_valve, remaining_time - path_length, valve_map), flow_rate)
-        return flow_rate + current_flow_rate
-
-    def find_path(self, valves, start):
-        to_do = [(start, 0)]
-        distances = dict()
-        distances[start] = 0
-        while len(to_do) > 0 and len(distances) < len(valves):
-            valve, length = to_do.pop(0)
-            to_do.extend([(v, length + 1) for v in valves[valve].links])
-            to_do = list(filter(lambda x: x[0] not in distances.keys(), to_do))
-            if valve in distances:
-                continue
-            distances[valve] = length
-
-        return distances
+        traversal = nog.TraversalShortestPaths(data.next_edges)
+        for state in traversal.start_from((start_valve, data.valves_to_open, 0)):
+            valve, closed, flow_rate = state
+            if traversal.depth == time_limit or not closed:
+                return data.max_flow_rate * time_limit - traversal.distance
 
     def tests(self):
         yield self.test_solve(example), 1651, "example"
 
 
 class PartB(PartA):
+    def compute(self, data):
+        def next_edges_group(state, _):
+            my_position, elephant_position, closed, flow_rate = state
+            for my_next, elephant_next in itertools.product(
+                next_edges((my_position, closed, flow_rate), _),
+                next_edges((elephant_position, closed, flow_rate), _)
+            ):
+                (my_target, my_closed, my_flow_rate), weight = my_next
+                (elephant_target, elephant_closed, elephant_flow_rate), weight = elephant_next
+                if my_closed != elephant_closed or my_closed == closed:
+                    yield (my_target, elephant_target, my_closed.intersection(elephant_closed),
+                           my_flow_rate + elephant_flow_rate - flow_rate), weight
+
+        start_valve = "AA"
+        time_limit = 26
+        next_edges = data.next_edges
+        traversal = nog.TraversalShortestPaths(next_edges_group)
+        for state in traversal.start_from((start_valve, start_valve, data.valves_to_open, 0)):
+            my_valve, elephant_valve, closed, flow_rate = state
+            if traversal.depth == time_limit or not closed:
+                return data.max_flow_rate * time_limit - traversal.distance
 
     def tests(self):
         yield self.test_solve(example), 1707, "example"
