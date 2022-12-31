@@ -1,17 +1,14 @@
 import re
+from functools import reduce
+
 from mylib.aoc_basics import Day
 import nographs as nog
 
 
 class Blueprint:
-    def __init__(self, id, ore_robot_ore_cost, clay_robot_ore_cost, obisidian_robot_ore_cost, obsidian_robot_clay_cost, geode_robot_ore_cost, geode_robot_obsidian_cost):
+    def __init__(self, id, costs):
         self.id = id
-        self.ore_robot_ore_cost = ore_robot_ore_cost
-        self.clay_robot_ore_cost = clay_robot_ore_cost
-        self.obsidian_robot_ore_cost = obisidian_robot_ore_cost
-        self.obsidian_robot_clay_cost = obsidian_robot_clay_cost
-        self.geode_robot_ore_cost = geode_robot_ore_cost
-        self.geode_robot_obsidian_cost = geode_robot_obsidian_cost
+        self.costs = costs
 
     def simulate(self, minutes):
         def next_edges(state, traversal):
@@ -26,10 +23,10 @@ class Blueprint:
             for robot in range(4):
                 if robot < 3 and production[robot] >= max_robots_needed[robot]:
                     continue
-                if any(cost > material for cost, material in zip(costs[robot], materials)):
-                    blocked_robots_costs.append(costs[robot])
+                if any(cost > material for cost, material in zip(self.costs[robot], materials)):
+                    blocked_robots_costs.append(self.costs[robot])
                     continue
-                yield (tuple(m - c for m, c in zip(next_materials, costs[robot])),
+                yield (tuple(m - c for m, c in zip(next_materials, self.costs[robot])),
                        tuple(x + 1 if i == robot else x for i, x in enumerate(production))
                        ), 0 if robot == 3 else minutes_left
                 robots_bought += 1
@@ -46,13 +43,7 @@ class Blueprint:
 
             yield (next_materials, production), minutes_left
 
-        costs = [(self.ore_robot_ore_cost, 0, 0, 0),
-                 (self.clay_robot_ore_cost, 0, 0, 0),
-                 (self.obsidian_robot_ore_cost, self.obsidian_robot_clay_cost, 0, 0),
-                 (self.geode_robot_ore_cost, 0, self.geode_robot_obsidian_cost, 0)]
-
-        max_robots_needed = [max(costs[robot][product] for robot in range(4)) for product in range(4)]
-
+        max_robots_needed = [max(self.costs[robot][product] for robot in range(4)) for product in range(4)]
         start = ((0, 0, 0, 0), (1, 0, 0, 0))
         traversal = nog.TraversalShortestPaths(next_edges)
         for state in traversal.start_from(start):
@@ -63,7 +54,7 @@ class Blueprint:
         else:
             raise RuntimeError("no best solution found")
 
-        return geodes * self.id
+        return geodes
 
 
     @classmethod
@@ -77,7 +68,13 @@ class Blueprint:
             obsidian_robot_clay_cost = int(matcher.group(5))
             geode_robot_ore_cost = int(matcher.group(6))
             geode_robot_obsidian_cost = int(matcher.group(7))
-            return Blueprint(id, ore_robot_ore_cost, clay_robot_ore_cost, obsidian_robot_ore_cost, obsidian_robot_clay_cost, geode_robot_ore_cost, geode_robot_obsidian_cost)
+            costs = [
+                (ore_robot_ore_cost, 0, 0, 0),
+                (clay_robot_ore_cost, 0, 0, 0),
+                (obsidian_robot_ore_cost, obsidian_robot_clay_cost, 0, 0),
+                (geode_robot_ore_cost, 0, geode_robot_obsidian_cost, 0)
+            ]
+            return Blueprint(id, costs)
 
 
 class PartA(Day):
@@ -88,7 +85,7 @@ class PartA(Day):
         minutes_to_simulate = 24
         results = []
         for blueprint in data.blueprints:
-            results.append(blueprint.simulate(minutes_to_simulate))
+            results.append(blueprint.simulate(minutes_to_simulate) * blueprint.id)
         return sum(results)
 
 
@@ -101,10 +98,16 @@ Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsid
 Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.
 """
 
-class PartB(Day):
+class PartB(PartA):
+    def compute(self, data):
+        minutes_to_simulate = 32
+        results = []
+        for blueprint in data.blueprints[0:3]:
+            results.append(blueprint.simulate(minutes_to_simulate))
+        return reduce(lambda a, b: a * b, results)
 
     def example_answer(self):
-        return -1
+        return 3472
 
 
 Day.do_day(19, 2022, PartA, PartB)
