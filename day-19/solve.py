@@ -1,6 +1,5 @@
 import re
 from functools import reduce
-
 from mylib.aoc_basics import Day
 import nographs as nog
 
@@ -56,7 +55,6 @@ class Blueprint:
 
         return geodes
 
-
     @classmethod
     def from_string(cls, string):
         matcher = re.search("Blueprint (\d+):.*ore robot.*(\d+) ore\..*clay robot.*(\d+) ore\..*obsidian robot.*(\d+) ore and (\d+) clay\..*geode robot.*(\d+) ore and (\d+) obsidian", string)
@@ -88,7 +86,6 @@ class PartA(Day):
             results.append(blueprint.simulate(minutes_to_simulate) * blueprint.id)
         return sum(results)
 
-
     def example_answer(self):
         return 33
 
@@ -97,6 +94,7 @@ class PartA(Day):
 Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
 Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.
 """
+
 
 class PartB(PartA):
     def compute(self, data):
