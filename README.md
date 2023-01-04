@@ -1,4 +1,6 @@
-# Advent-Of-Code-2022
-Advent of Code Challenges of the year 2022 (see https://adventofcode.com/2022)
+# Advent-Of-Code
+Advent of Code Challenges (see https://adventofcode.com/2022)
+
+The challenges for each year are in a separate subdirectory.
 
 The challenges are implemented in python3.
