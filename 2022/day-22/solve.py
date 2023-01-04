@@ -47,8 +47,10 @@ class PartA(Day):
         return 6032
 
 
-class PartB(Day):
-    pass
+class PartB(PartA):
+
+    def example_answer(self):
+        return 5031
 
 
 Day.do_day(22, 2022, PartA, PartB)
