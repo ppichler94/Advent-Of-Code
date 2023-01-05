@@ -1,31 +1,24 @@
-def main():
-    example_data = read_input_from_file("example.txt")
-    input_data = read_input_from_file("input.txt")
-
-    print(f'Result example A: {solve(example_data, 4)}\n')
-    print(f'Result puzzle data A: {solve(input_data, 4)}\n')
-    print(f'Result example B: {solve(example_data, 14)}\n')
-    print(f'Result puzzle data B: {solve(input_data, 14)}\n')
+from mylib.aoc_basics import Day
 
 
-def read_input_from_file(file_name):
-    input_file = open(file_name, "r")
-    data = input_file.readlines()
-    input_file.close()
-    data = [x.strip() for x in data]
-    return data[0]
+class PartA(Day):
+    def part_config(self, data):
+        data.packet_length = 4
+
+    def compute(self, data):
+        for i in range(data.packet_length, len(data.text)):
+            if PartA.all_different(data.text[i-data.packet_length:i]):
+                return i
+
+    @classmethod
+    def all_different(cls, text):
+        set_text = set(text)
+        return len(set_text) == len(text)
 
 
-def solve(input, packet_length):
-    for i in range(packet_length, len(input)):
-        if all_different(input[i-packet_length:i]):
-            return i
+class PartB(PartA):
+    def part_config(self, data):
+        data.packet_length = 14
 
 
-def all_different(text):
-    set_text = set(text)
-    return len(set_text) == len(text)
-
-
-if __name__ == "__main__":
-    main()
+Day.do_day(6, 2022, PartA, PartB)
