@@ -5,13 +5,14 @@ from aocd.models import Puzzle
 
 def submit(puzzle: Puzzle, answer, value):
     green = "\033[0;32m"
+    yellow = "\033[0;33m"
     red = "\033[0;31m"
     default = "\033[00m"
 
     print()
     print("  >>", answer, ": ", value)
     if answer not in ("answer_a", "answer_b"):
-        print("Answer ignored: answer does not match answer_a or answer_b")
+        print(f"{yellow}Answer ignored:{default} answer does not match answer_a or answer_b")
         return
 
     if type(value) == int:
@@ -19,7 +20,7 @@ def submit(puzzle: Puzzle, answer, value):
     elif type(value) == str:
         value_str = value
     else:
-        print("Answer ignored: value type is neither int nor string")
+        print(f"{yellow}Answer ignored:{default} value type is neither int nor string")
         return
 
     if answer == "answer_a" and puzzle.answered_a:
@@ -60,9 +61,10 @@ class Day:
         data.text = text
 
     def part_config(self, data):
+        # Optional configuration which differs between part a and partb
         pass
 
-    def compute(self, data):
+    def compute(self, _):
         return ''
 
     def tests(self):
