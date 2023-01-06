@@ -1,15 +1,6 @@
 from collections import namedtuple
 
-
-def main():
-    example_data = read_input_from_file("example.txt")
-    input_data = read_input_from_file("input.txt")
-
-    print(f'Result example A: {solve_a(example_data)}\n')
-    print(f'Result puzzle data A: {solve_a(input_data)}\n')
-    print(f'Result example B: {solve_b(example_data)}\n')
-    print(f'Result puzzle data B: {solve_b(input_data)}\n')
-
+from mylib.aoc_basics import Day
 
 File = namedtuple("File", ["name", "size"])
 
@@ -30,80 +21,66 @@ class Directory:
         return size
 
 
-def read_input_from_file(file_name):
-    input_file = open(file_name, "r")
-    data = input_file.readlines()
-    input_file.close()
-    data = [x.strip() for x in data]
-    return data
+class PartA(Day):
+    def parse(self, text, data):
+        lines = text.splitlines()
+        current_dir = Directory()
+        current_dir.name = "root"
+        for i in range(1, len(lines)):
+            line = lines[i]
+            match line.split(" "):
+                case ["$", "ls"]:
+                    PartA.parse_ls(lines[i+1:], current_dir)
+                case ["$", "cd", ".."]:
+                    current_dir = current_dir.parent
+                case ["$", "cd", name]:
+                    current_dir = [d for d in current_dir.directories if d.name == name][0]
+        while current_dir.parent:
+            current_dir = current_dir.parent
+        data.root = current_dir
+
+    def compute(self, data):
+        sizes = []
+        PartA.calculate_sizes(data.root, sizes)
+        return sum([s for s in sizes if s <= 100000])
+
+    @classmethod
+    def parse_ls(cls, lines, current_dir):
+        for line in lines:
+            if line[0] == "$":
+                return
+            if line[0:3] == "dir":
+                d = Directory()
+                d.name = line[4:]
+                d.parent = current_dir
+                current_dir.directories.append(d)
+            else:
+                parts = line.split(" ")
+                current_dir.files.append(File(parts[1], int(parts[0])))
+
+    @classmethod
+    def calculate_sizes(cls, directory, sizes):
+        sizes.append(directory.size())
+        for d in directory.directories:
+            PartA.calculate_sizes(d, sizes)
 
 
-def solve_a(input):
-    root = parse_commands(input)
-    sizes = []
-    calculate_sizes(root, sizes)
-    return sum([s for s in sizes if s <= 100000])
+class PartB(PartA):
+    def compute(self, data):
+        required_size = 30000000 - (70000000 - data.root.size())
+        result = PartB.find_dir_to_delete(required_size, data.root, data.root.size())
+        return result
+
+    @classmethod
+    def find_dir_to_delete(cls, required_size, directory, size):
+        for d in directory.directories:
+            result = PartB.find_dir_to_delete(required_size, d, size)
+            if required_size <= result < size:
+                return result
+        directory_size = directory.size()
+        if required_size <= directory_size < size:
+            return directory_size
+        return size
 
 
-def parse_commands(input):
-    current_dir = Directory()
-    current_dir.name = "root"
-    for i in range(1, len(input)):
-        line = input[i]
-        match line.split(" "):
-            case ["$", "ls"]:
-                parse_ls(input[i+1:], current_dir)
-            case ["$", "cd", ".."]:
-                current_dir = current_dir.parent
-            case ["$", "cd", name]:
-                current_dir = [d for d in current_dir.directories if d.name == name][0]
-    return find_root(current_dir)
-
-
-def parse_ls(input, current_dir):
-    for line in input:
-        if line[0] == "$":
-            return
-        if line[0:3] == "dir":
-            d = Directory()
-            d.name = line[4:]
-            d.parent = current_dir
-            current_dir.directories.append(d)
-        else:
-            parts = line.split(" ")
-            current_dir.files.append(File(parts[1], int(parts[0])))
-
-
-def find_root(direcotry):
-    d = direcotry
-    while d.parent:
-        d = d.parent
-    return d
-
-
-def calculate_sizes(direcotry, sizes):
-    sizes.append(direcotry.size())
-    for d in direcotry.directories:
-        calculate_sizes(d, sizes)
-
-
-def solve_b(input):
-    root = parse_commands(input)
-    required_size = 30000000 - (70000000 - root.size())
-    result = find_dir_to_delete(required_size, root, root.size())
-    return result
-
-
-def find_dir_to_delete(required_size, directory, size):
-    for d in directory.directories:
-        result = find_dir_to_delete(required_size, d, size)
-        if result >= required_size and result < size:
-            return result
-    direcotry_size = directory.size()
-    if direcotry_size >= required_size and direcotry_size < size:
-        return direcotry_size
-    return size
-
-
-if __name__ == "__main__":
-    main()
+Day.do_day(7, 2022, PartA, PartB)
