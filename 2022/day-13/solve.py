@@ -1,5 +1,4 @@
 import copy
-
 from numpy import sign
 
 def main():

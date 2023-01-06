@@ -1,4 +1,3 @@
-import numpy as np
 from mylib.aoc_basics import Day
 import nographs as nog
 
@@ -28,7 +27,6 @@ class PartA(Day):
     def elevation(character):
         character = {"S": "a", "E": "z"}.get(character, character)
         return ord(character) - ord("a")
-
 
     def example_answer(self):
         return 31
