@@ -1,79 +1,187 @@
-def main():
-    example_data = read_input_from_file("example.txt")
-    input_data = read_input_from_file("input.txt")
-
-    print(f'Result example A: {solve_a(example_data)}\n')
-    print(f'Result puzzle data A: {solve_a(input_data)}\n')
-    print(f'Result example B: {solve_b(example_data)}\n')
-    print(f'Result puzzle data B: {solve_b(input_data)}\n')
+from mylib.aoc_basics import Day
 
 
-def read_input_from_file(file_name):
-    input_file = open(file_name, "r")
-    data = input_file.readlines()
-    input_file.close()
-    data = [x.strip() for x in data]
-    return data
+class PartA(Day):
+    def parse(self, text, data):
+        def run(lines):
+            x = 1
+            for line in lines:
+                match line.split():
+                    case ["noop"]:
+                        yield x
+                    case ["addx", parameter_text]:
+                        yield x
+                        yield x
+                        x += int(parameter_text)
+        data.generator = run(text.splitlines())
+
+    def compute(self, data):
+        result = 0
+        interesting_cycles = {20, 60, 100, 140, 180, 220}
+        for cycle, x in enumerate(data.generator, 1):
+            if cycle in interesting_cycles:
+                result += cycle * x
+        return result
+
+    def get_example_input(self, puzzle):
+        return """
+addx 15
+addx -11
+addx 6
+addx -3
+addx 5
+addx -1
+addx -8
+addx 13
+addx 4
+noop
+addx -1
+addx 5
+addx -1
+addx 5
+addx -1
+addx 5
+addx -1
+addx 5
+addx -1
+addx -35
+addx 1
+addx 24
+addx -19
+addx 1
+addx 16
+addx -11
+noop
+noop
+addx 21
+addx -15
+noop
+noop
+addx -3
+addx 9
+addx 1
+addx -3
+addx 8
+addx 1
+addx 5
+noop
+noop
+noop
+noop
+noop
+addx -36
+noop
+addx 1
+addx 7
+noop
+noop
+noop
+addx 2
+addx 6
+noop
+noop
+noop
+noop
+noop
+addx 1
+noop
+noop
+addx 7
+addx 1
+noop
+addx -13
+addx 13
+addx 7
+noop
+addx 1
+addx -33
+noop
+noop
+noop
+addx 2
+noop
+noop
+noop
+addx 8
+noop
+addx -1
+addx 2
+addx 1
+noop
+addx 17
+addx -9
+addx 1
+addx 1
+addx -3
+addx 11
+noop
+noop
+addx 1
+noop
+addx 1
+noop
+noop
+addx -13
+addx -19
+addx 1
+addx 3
+addx 26
+addx -30
+addx 12
+addx -1
+addx 3
+addx 1
+noop
+noop
+noop
+addx -9
+addx 18
+addx 1
+addx 2
+noop
+noop
+addx 9
+noop
+noop
+noop
+addx -1
+addx 2
+addx -37
+addx 1
+addx 3
+noop
+addx 15
+addx -21
+addx 22
+addx -6
+addx 1
+noop
+addx 2
+addx 1
+noop
+addx -10
+noop
+noop
+addx 20
+addx 1
+addx 2
+addx 2
+addx -6
+addx -11
+noop
+noop
+noop
+"""
 
 
-def solve_a(input):
-    state = {
-        'x': 1,
-        'cycle': 1,
-        'result': 0
-    }
-    for line in input:
-        execute_instruction(state, line, handle_cycle_a)
-    return state["result"]
+class PartB(PartA):
+    def compute(self, data):
+        for _ in range(6):
+            for column in range(40):
+                x = next(data.generator)
+                print("#" if x-1 <= column <= x+1 else ".", end="")
+            print()
 
 
-def execute_instruction(state, instruction, handle_cycle):
-    parts = instruction.split(" ")
-    command = parts[0]
-    match command:
-        case "addx":
-            handle_cycle(state, 2)
-            parameter = int(parts[1])
-            state["x"] += parameter
-        case "noop":
-            handle_cycle(state, 1)
+Day.do_day(10, 2022, PartA, PartB)
 
-
-def handle_cycle_a(state, count):
-    for _ in range(count):
-        if is_interesting(state["cycle"]):
-            state["result"] += state["cycle"] * state["x"]
-        state["cycle"] += 1
-
-
-def is_interesting(cycle):
-    interesting_cycles = [20, 60, 100, 140, 180, 220]
-    return cycle in interesting_cycles
-
-
-def solve_b(input):
-    state = {
-        'x': 1,
-        'cycle': 1,
-        'crt': []
-    }
-    for line in input:
-        execute_instruction(state, line, handle_cycle_b)
-    for l in state["crt"]:
-        print(l)
-    print("\n")
-
-
-def handle_cycle_b(state, count):
-    for _ in range(count):
-        line = (state["cycle"] - 1) // 40
-        column = (state["cycle"] - 1) % 40
-        if column == 0:
-            state["crt"].append("")
-        sprite_visible = column >= (state["x"] - 1) and column <= (state["x"] + 1)
-        state["crt"][line] += "#" if sprite_visible else "."
-        state["cycle"] += 1
-
-
-if __name__ == "__main__":
-    main()
