@@ -41,7 +41,7 @@ def submit(puzzle: Puzzle, answer, value):
     print("Submit answer? (y/n)")
     f = sys.stdin
     line = f.read(1)
-    if line == "y":
+    if line[0] == "y":
         setattr(puzzle, answer, value_str)
         print("Answer Submitted")
 
@@ -138,5 +138,7 @@ class Day:
     @staticmethod
     def do_day(day, year, part_a, part_b):
         puzzle = Puzzle(day=day, year=year)
-        part_a().do_part(puzzle)
-        part_b().do_part(puzzle)
+        if part_a:
+            part_a().do_part(puzzle)
+        if part_b:
+            part_b().do_part(puzzle)
