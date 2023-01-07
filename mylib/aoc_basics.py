@@ -82,7 +82,7 @@ class Day:
         print("Starting test...")
         t = timeit.default_timer()
         passed_tests = 0
-        tests = [(self.get_example_input(puzzle), self.example_answer(), "Example")]
+        tests = [(self.get_example_input(puzzle), self.example_answer(), "Example", "example run")]
         tests.extend(self.tests())
         for text, result_ok, *more in tests:
             passed = self.execute_test(text, result_ok, more)
@@ -98,7 +98,7 @@ class Day:
         red = "\033[0;31m"
         default = "\033[00m"
         test_name = "" if len(more) == 0 else f"'{more[0]}'"
-        result = self.test_solve(text)
+        result = self.test_solve(text, more[1:])
         if result == result_ok or not result_ok:
             print(f"  {green}>>{default} Test {test_name} {green}OK{default}  Result: {result}")
             return True
