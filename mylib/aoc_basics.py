@@ -95,10 +95,13 @@ class Day:
 
     def execute_test(self, text, result_ok, more):
         green = "\033[0;32m"
+        yellow = "\033[0;33m"
         red = "\033[0;31m"
         default = "\033[00m"
         test_name = "" if len(more) == 0 else f"'{more[0]}'"
         result = self.test_solve(text, more[1:])
+        if not result_ok:
+            print(f"{yellow}  >> Test result is not checked{default}")
         if result == result_ok or not result_ok:
             print(f"  {green}>>{default} Test {test_name} {green}OK{default}  Result: {result}")
             return True
