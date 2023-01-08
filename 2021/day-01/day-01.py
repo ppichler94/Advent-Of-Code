@@ -1,50 +1,34 @@
-def readInputFromFile(fileName):
-    inputFile = open(fileName, "r")
-    input = inputFile.readlines()
-    input = [x.strip() for x in input]
-    inputFile.close()
-    return input
+from mylib.aoc_basics import Day
 
 
-def day01A(input):
-    increase = 0
-    previous = int(input.pop(0))
-    for current in input:
-        value = int(current)
-        if (value > previous):
-            increase += 1
-        previous = value
+class PartA(Day):
+    def parse(self, text, data):
+        data.numbers = [int(x) for x in text.splitlines()]
 
-    return increase
+    def compute(self, data):
+        pairs = list(zip(data.numbers, data.numbers[1:]))
+        return sum(1 if b > a else 0 for a, b in pairs)
 
-
-def day01B(input):
-    depthOfWindow = []
-    for i in range(0, len(input)-2):
-        sum = 0
-        for j in range(0, 3):
-            sum += int(input[i+j])
-        depthOfWindow.append(sum)
-
-    increase = 0
-    previous = depthOfWindow.pop(0)
-    for value in depthOfWindow:
-        if (value > previous):
-            increase += 1
-        previous = value
-
-    return increase
+    def example_answer(self):
+        return 7
 
 
-def main():
-    example = readInputFromFile("day-01/example.txt")
-    input = readInputFromFile("day-01/input.txt")
+class PartB(PartA):
+    def compute(self, data):
+        sliding_window_generator = self.sliding_window(data.numbers, 3)
+        window_sums = [sum(x) for x in sliding_window_generator]
+        pairs = list(zip(window_sums, window_sums[1:]))
+        return sum(1 if b > a else 0 for a, b in pairs)
 
-    print(f'Result example A: {day01A(example)}\n')
-    print(f'Result puzzle data A: {day01A(input)}\n')
-    print(f'Result example B: {day01B(example)}\n')
-    print(f'Result puzzle data B: {day01B(input)}\n')
+    @staticmethod
+    def sliding_window(elements, window_size):
+        if len(elements) < window_size:
+            return elements
+        for i in range(len(elements) - window_size + 1):
+            yield elements[i:i + window_size]
+
+    def example_answer(self):
+        return 5
 
 
-if __name__ == "__main__":
-    main()
+Day.do_day(1, 2021, PartA, PartB)

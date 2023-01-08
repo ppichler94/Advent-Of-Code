@@ -1,62 +1,51 @@
-def readInputFromFile(fileName):
-    inputFile = open(fileName, "r")
-    input = inputFile.readlines()
-    input = [x.strip() for x in input]
-    inputFile.close()
-    return input
+from mylib.aoc_basics import Day
 
 
-def day02A(input):
-    horizontalPos = 0
-    depth = 0
+class PartA(Day):
+    def parse(self, text, data):
+        data.instructions = [(command, int(count))
+                             for command, count
+                             in [s.split(" ") for s in text.splitlines()]]
 
-    for commandString in input:
-        commands = commandString.split(" ")
-        direction = commands[0]
-        count = int(commands[1])
+    def compute(self, data):
+        horizontal_pos = 0
+        depth = 0
 
-        if direction == "forward":
-            horizontalPos += count
-        elif direction == "down":
-            depth += count
-        elif direction == "up":
-            depth -= count
+        for instruction in data.instructions:
+            match instruction:
+                case ("forward", count):
+                    horizontal_pos += count
+                case ("down", count):
+                    depth += count
+                case ("up", count):
+                    depth -= count
 
-    print(f'horizontal position: {horizontalPos} | depth: {depth}')
-    return horizontalPos * depth
+        return horizontal_pos * depth
 
-
-def day02B(input):
-    horizontalPos = 0
-    depth = 0
-    aim = 0
-
-    for commandString in input:
-        commands = commandString.split(" ")
-        direction = commands[0]
-        count = int(commands[1])
-
-        if direction == "forward":
-            horizontalPos += count
-            depth += aim * count
-        elif direction == "down":
-            aim += count
-        elif direction == "up":
-            aim -= count
-
-    print(f'horizontal position: {horizontalPos} | depth: {depth}')
-    return horizontalPos * depth
+    def example_answer(self):
+        return 150
 
 
-def main():
-    example = readInputFromFile("day-02/example.txt")
-    input = readInputFromFile("day-02/input.txt")
+class PartB(PartA):
+    def compute(self, data):
+        horizontal_pos = 0
+        depth = 0
+        aim = 0
 
-    print(f'Result example A: {day02A(example)}\n')
-    print(f'Result puzzle data A: {day02A(input)}\n')
-    print(f'Result example B: {day02B(example)}\n')
-    print(f'Result puzzle data B: {day02B(input)}\n')
+        for instruction in data.instructions:
+            match instruction:
+                case ("forward", count):
+                    horizontal_pos += count
+                    depth += aim * count
+                case ("down", count):
+                    aim += count
+                case ("up", count):
+                    aim -= count
+
+        return horizontal_pos * depth
+
+    def example_answer(self):
+        return 900
 
 
-if __name__ == "__main__":
-    main()
+Day.do_day(2, 2021, PartA, PartB)
