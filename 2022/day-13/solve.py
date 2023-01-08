@@ -39,6 +39,9 @@ class PartA(Day):
             data2 = [data2]
         return PartA.compare_lists(data1, data2)
 
+    def example_answer(self):
+        return 13
+
 
 class PartB(PartA):
     def compute(self, data):
@@ -57,6 +60,9 @@ class PartB(PartA):
         marker1 = sorted_packets.index([[2]]) + 1
         marker2 = sorted_packets.index([[6]]) + 1
         return marker1 * marker2
+
+    def example_answer(self):
+        return 140
 
 
 Day.do_day(13, 2022, PartA, PartB)

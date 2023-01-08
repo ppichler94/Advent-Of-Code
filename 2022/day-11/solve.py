@@ -26,8 +26,8 @@ class Monkey:
             self.items_inspected += 1
         self.items = []
 
-    @classmethod
-    def calculate_modulo(cls, monkeys):
+    @staticmethod
+    def calculate_modulo(monkeys):
         modulo = 1
         for monkey in monkeys:
             modulo *= monkey.test_number
@@ -36,8 +36,8 @@ class Monkey:
     def add(self, item):
         self.items.append(item)
 
-    @classmethod
-    def from_string(cls, lines):
+    @staticmethod
+    def from_string(lines):
         items = [int(x) for x in lines[1].split(": ")[1].split(", ")]
         operation = lines[2].split(": ")[1]
         test_number = int(lines[3].split("by ")[1])
@@ -64,11 +64,17 @@ class PartA(Day):
         items_inspected.sort()
         return items_inspected[-1] * items_inspected[-2]
 
+    def example_answer(self):
+        return 10605
+
 
 class PartB(PartA):
     def part_config(self, data):
         data.rounds = 10000
         data.worry_level_factor = 1
+
+    def example_answer(self):
+        return 2713310158
 
 
 Day.do_day(11, 2022, PartA, PartB)
