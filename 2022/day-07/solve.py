@@ -1,5 +1,4 @@
 from collections import namedtuple
-
 from mylib.aoc_basics import Day
 
 File = namedtuple("File", ["name", "size"])
@@ -44,8 +43,8 @@ class PartA(Day):
         PartA.calculate_sizes(data.root, sizes)
         return sum([s for s in sizes if s <= 100000])
 
-    @classmethod
-    def parse_ls(cls, lines, current_dir):
+    @staticmethod
+    def parse_ls(lines, current_dir):
         for line in lines:
             if line[0] == "$":
                 return
@@ -58,11 +57,41 @@ class PartA(Day):
                 parts = line.split(" ")
                 current_dir.files.append(File(parts[1], int(parts[0])))
 
-    @classmethod
-    def calculate_sizes(cls, directory, sizes):
+    @staticmethod
+    def calculate_sizes(directory, sizes):
         sizes.append(directory.size())
         for d in directory.directories:
             PartA.calculate_sizes(d, sizes)
+
+    def example_answer(self):
+        return 95437
+
+    def get_example_input(self, puzzle):
+        return """
+$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k
+"""
 
 
 class PartB(PartA):
@@ -71,8 +100,8 @@ class PartB(PartA):
         result = PartB.find_dir_to_delete(required_size, data.root, data.root.size())
         return result
 
-    @classmethod
-    def find_dir_to_delete(cls, required_size, directory, size):
+    @staticmethod
+    def find_dir_to_delete(required_size, directory, size):
         for d in directory.directories:
             result = PartB.find_dir_to_delete(required_size, d, size)
             if required_size <= result < size:
@@ -81,6 +110,9 @@ class PartB(PartA):
         if required_size <= directory_size < size:
             return directory_size
         return size
+
+    def example_answer(self):
+        return 24933642
 
 
 Day.do_day(7, 2022, PartA, PartB)

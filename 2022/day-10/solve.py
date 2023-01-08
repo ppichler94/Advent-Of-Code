@@ -23,6 +23,9 @@ class PartA(Day):
                 result += cycle * x
         return result
 
+    def example_answer(self):
+        return 13140
+
     def get_example_input(self, puzzle):
         return """
 addx 15
@@ -181,6 +184,9 @@ class PartB(PartA):
                 x = next(data.generator)
                 print("#" if x-1 <= column <= x+1 else ".", end="")
             print()
+
+    def example_answer(self):
+        return None
 
 
 Day.do_day(10, 2022, PartA, PartB)

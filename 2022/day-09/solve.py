@@ -1,5 +1,4 @@
 import numpy as np
-
 from mylib.aoc_basics import Day
 
 
@@ -14,16 +13,16 @@ class PartA(Day):
             PartA.execute_motion(line, visited, head_pos, data.knots)
         return len(visited)
 
-    @classmethod
-    def execute_motion(cls, motion, visited, head_pos, knots):
+    @staticmethod
+    def execute_motion(motion, visited, head_pos, knots):
         motion_parts = motion.split(" ")
         direction = motion_parts[0]
         count = int(motion_parts[1])
         for _ in range(count):
             PartA.execute_step(direction, visited, head_pos, knots)
 
-    @classmethod
-    def execute_step(cls, direction, visited, head_pos, knots):
+    @staticmethod
+    def execute_step(direction, visited, head_pos, knots):
         match direction:
             case "U":
                 head_pos[1] += 1
@@ -40,8 +39,8 @@ class PartA(Day):
                 break
         visited.add(f'{knots[-1][0]}.{knots[-1][1]}')
 
-    @classmethod
-    def update_tail_pos(cls, head_pos, tail_pos):
+    @staticmethod
+    def update_tail_pos(head_pos, tail_pos):
         diff = head_pos - tail_pos
         if np.linalg.norm(diff) < 2:
             return False
@@ -51,6 +50,9 @@ class PartA(Day):
             diff = np.divide(diff, np.absolute(diff))
         tail_pos += np.rint(diff).astype(int)
         return True
+
+    def example_answer(self):
+        return 13
 
     def get_example_input(self, puzzle):
         return """
@@ -68,6 +70,24 @@ R 2
 class PartB(PartA):
     def part_config(self, data):
         data.knots = [np.zeros(2, dtype=int) for _ in range(9)]
+
+    def example_answer(self):
+        return 1
+
+    def tests(self):
+        yield example2, 36, "Larger example"
+
+
+example2 = """
+R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20
+"""
 
 
 Day.do_day(9, 2022, PartA, PartB)
