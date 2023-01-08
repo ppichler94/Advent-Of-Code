@@ -11,7 +11,7 @@ class PartA(Day):
     def parse(self, text, data):
         data.valves = dict()
         for line in text.split("\n"):
-            matcher = re.search("Valve (.*) has flow rate=(\d+); tunnels? leads? to valves? (.*)", line)
+            matcher = re.search(r"Valve (.*) has flow rate=(\d+); tunnels? leads? to valves? (.*)", line)
             if matcher:
                 name = matcher.group(1)
                 data.valves[name] = Valve(name, int(matcher.group(2)), matcher.group(3).split(", "))
@@ -67,18 +67,5 @@ class PartB(PartA):
     def example_answer(self):
         return 1707
 
-
-example = ''''
-Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
-Valve BB has flow rate=13; tunnels lead to valves CC, AA
-Valve CC has flow rate=2; tunnels lead to valves DD, BB
-Valve DD has flow rate=20; tunnels lead to valves CC, AA, EE
-Valve EE has flow rate=3; tunnels lead to valves FF, DD
-Valve FF has flow rate=0; tunnels lead to valves EE, GG
-Valve GG has flow rate=0; tunnels lead to valves FF, HH
-Valve HH has flow rate=22; tunnel leads to valve GG
-Valve II has flow rate=0; tunnels lead to valves AA, JJ
-Valve JJ has flow rate=21; tunnel leads to valve II
-'''
 
 Day.do_day(16, 2022, PartA, PartB)

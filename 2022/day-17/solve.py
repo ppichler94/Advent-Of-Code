@@ -57,7 +57,8 @@ class PartA(Day):
                 data.height = max(index[0] for index in np.argwhere(data.cave == 1)) + 1
                 return jet_index
 
-    def intersects(self, rock, data, x, y):
+    @staticmethod
+    def intersects(rock, data, x, y):
         if x < 0 or x + rock.shape[1] > 7:
             return True
         if y < 0:

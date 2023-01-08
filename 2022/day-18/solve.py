@@ -25,7 +25,8 @@ class PartB(PartA):
                    for cube in data.cubes
                    for neighbor in cube.neighbors(data.moves))
 
-    def find_exterior_cubes(self, data):
+    @staticmethod
+    def find_exterior_cubes(data):
         def next_edges(cube, _):
             for target in cube.neighbors(data.moves, limits):
                 yield target

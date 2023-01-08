@@ -24,7 +24,8 @@ class PartA(Day):
         number3 = data.numbers[(zero_index + 3000) % len(data.numbers)][1]
         return number1 + number2 + number3
 
-    def mix(self, data):
+    @staticmethod
+    def mix(data):
         for id, number in data.numbers_orig:
             index = data.numbers.index((id, number))
             data.numbers.rotate(-index)

@@ -81,11 +81,11 @@ class PartB(PartA):
                     data.humn_jobs[arg1] = self.do_job(data.jobs, arg1)
                     self.do_humn_jobs(data, key)
 
-    def find_job_with(self, data, monkey):
+    @staticmethod
+    def find_job_with(data, monkey):
         for key, job in data.jobs.items():
-            if type(job) != int:
-                if job[0] == monkey or job[2] == monkey:
-                    return key, job
+            if type(job) != int and (job[0] == monkey or job[2] == monkey):
+                return key, job
 
     def example_answer(self):
         return 301

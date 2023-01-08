@@ -57,9 +57,9 @@ class Blueprint:
 
     @classmethod
     def from_string(cls, string):
-        matcher = re.search("Blueprint (\d+):.*ore robot.*(\d+) ore\..*clay robot.*(\d+) ore\..*obsidian robot.*(\d+) ore and (\d+) clay\..*geode robot.*(\d+) ore and (\d+) obsidian", string)
+        matcher = re.search(r"Blueprint (\d+):.*ore robot.*(\d+) ore\..*clay robot.*(\d+) ore\..*obsidian robot.*(\d+) ore and (\d+) clay\..*geode robot.*(\d+) ore and (\d+) obsidian", string)
         if matcher:
-            id = int(matcher.group(1))
+            blueprint_id = int(matcher.group(1))
             ore_robot_ore_cost = int(matcher.group(2))
             clay_robot_ore_cost = int(matcher.group(3))
             obsidian_robot_ore_cost = int(matcher.group(4))
@@ -72,7 +72,7 @@ class Blueprint:
                 (obsidian_robot_ore_cost, obsidian_robot_clay_cost, 0, 0),
                 (geode_robot_ore_cost, 0, geode_robot_obsidian_cost, 0)
             ]
-            return Blueprint(id, costs)
+            return Blueprint(blueprint_id, costs)
 
 
 class PartA(Day):
