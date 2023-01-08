@@ -27,7 +27,8 @@ class PartA(Day):
             score += self.calculate_score(opponent_shape, player_shape)
         return score
 
-    def get_shape(self, code):
+    @staticmethod
+    def get_shape(code):
         if code == "A" or code == "X":
             return Shape.ROCK
         if code == "B" or code == "Y":
@@ -43,10 +44,12 @@ class PartA(Day):
             score += Outcome.WIN
         return score
 
-    def is_draw(self, opponent_shape, player_shape):
+    @staticmethod
+    def is_draw(opponent_shape, player_shape):
         return opponent_shape == player_shape
 
-    def is_win(self, opponent_shape, player_shape):
+    @staticmethod
+    def is_win(opponent_shape, player_shape):
         if player_shape == Shape.ROCK and opponent_shape == Shape.SCISSORS:
             return True
         if player_shape == Shape.PAPER and opponent_shape == Shape.ROCK:
@@ -54,6 +57,9 @@ class PartA(Day):
         if player_shape == Shape.SCISSORS and opponent_shape == Shape.PAPER:
             return True
         return False
+
+    def example_answer(self):
+        return 15
 
 
 class PartB(PartA):
@@ -68,7 +74,8 @@ class PartB(PartA):
         return score
 
 
-    def get_outcome(self, code):
+    @staticmethod
+    def get_outcome(code):
         if code == "X":
             return Outcome.LOSS
         if code == "Y":
@@ -76,7 +83,8 @@ class PartB(PartA):
         if code == "Z":
             return Outcome.WIN
 
-    def calculate_shape(self, opponent_shape, outcome):
+    @staticmethod
+    def calculate_shape(opponent_shape, outcome):
         if outcome == Outcome.DRAW:
             return opponent_shape
         if opponent_shape == Shape.ROCK:
@@ -85,6 +93,9 @@ class PartB(PartA):
             return Shape.SCISSORS if outcome == Outcome.WIN else Shape.ROCK
         if opponent_shape == Shape.SCISSORS:
             return Shape.ROCK if outcome == Outcome.WIN else Shape.PAPER
+
+    def example_answer(self):
+        return 12
 
 
 Day.do_day(2, 2022, PartA, PartB)

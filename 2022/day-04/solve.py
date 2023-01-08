@@ -11,14 +11,17 @@ class PartA(Day):
                    else 0
                    for start1, end1, start2, end2 in data.sections)
 
+    def example_answer(self):
+        return 2
+
 
 class PartB(PartA):
     def compute(self, data):
         return sum(1 if PartB.overlaps(start1, end1, start2, end2) else 0
                    for start1, end1, start2, end2 in data.sections)
 
-    @classmethod
-    def overlaps(cls, start1, end1, start2, end2):
+    @staticmethod
+    def overlaps(start1, end1, start2, end2):
         if start2 <= start1 <= end2:
             return True
         if start2 <= end1 <= end2:
@@ -28,6 +31,9 @@ class PartB(PartA):
         if start1 <= end2 <= end1:
             return True
         return False
+
+    def example_answer(self):
+        return 4
 
 
 Day.do_day(4, 2022, PartA, PartB)

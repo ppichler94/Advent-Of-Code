@@ -34,12 +34,18 @@ class PartA(Day):
                 stacks[command.destination] += stacks[command.origin][-1]
                 stacks[command.origin] = stacks[command.origin][:-1]
 
+    def example_answer(self):
+        return "CMZ"
+
 
 class PartB(PartA):
     def crate_mover(self, stacks, commands):
         for command in commands:
             stacks[command.destination] += stacks[command.origin][-command.count:]
             stacks[command.origin] = stacks[command.origin][:-command.count]
+
+    def example_answer(self):
+        return "MCD"
 
 
 Day.do_day(5, 2022, PartA, PartB)

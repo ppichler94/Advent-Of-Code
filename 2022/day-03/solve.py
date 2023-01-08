@@ -13,16 +13,19 @@ class PartA(Day):
             priority_sum += PartA.priority_of(common_item)
         return priority_sum
 
-    @classmethod
-    def find_common_item(cls, *lists):
+    @staticmethod
+    def find_common_item(*lists):
         return set.intersection(*map(set, lists)).pop()
 
-    @classmethod
-    def priority_of(cls, item):
+    @staticmethod
+    def priority_of(item):
         if ord('a') <= ord(item) <= ord('z'):
             return 1 + ord(item) - ord('a')
         elif ord('A') <= ord(item) <= ord('Z'):
             return 27 + ord(item) - ord('A')
+
+    def example_answer(self):
+        return 157
 
 
 class PartB(PartA):
@@ -33,6 +36,9 @@ class PartB(PartA):
             badge = PartA.find_common_item(*lines[i:i+3])
             priority_sum += PartA.priority_of(badge)
         return priority_sum
+
+    def example_answer(self):
+        return 70
 
 
 Day.do_day(3, 2022, PartA, PartB)
