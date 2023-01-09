@@ -1,91 +1,69 @@
 import numpy as np
+import re
+from mylib.aoc_basics import Day
 
 
-def readInputFromFile(fileName):
-    inputFile = open(fileName, "r")
-    input = inputFile.readlines()
-    input = [x.strip() for x in input]
-    inputFile.close()
-    return input
+class PartA(Day):
+    def parse(self, text, data):
+        numbers_text, *boards_text = text.split("\n\n")
+        data.numbers = [int(x) for x in numbers_text.split(",")]
+        data.boards = [np.array([x for x in [re.findall(r"\d+", line) for line in block.splitlines()]], dtype=int)
+                       for block in boards_text]
+        data.marked_boards = [np.zeros([5, 5], dtype=int) for _ in range(len(data.boards))]
+
+    def compute(self, data):
+        for number in data.numbers:
+            for board, marked_board in zip(data.boards, data.marked_boards):
+                index = np.where(board == number)
+                marked_board[index] = 1
+                winning_board = self.check_winning_condition(marked_board, index)
+                if winning_board:
+                    return self.calculate_points(board, marked_board, number)
+        return 0
+
+    @staticmethod
+    def check_winning_condition(marked_board, mark_index):
+        column_sum = np.sum(marked_board, axis=0)[mark_index[1]]
+        row_sum = np.sum(marked_board, axis=1)[mark_index[0]]
+        if ((column_sum.size > 0 and column_sum == 5)
+            or (row_sum.size > 0 and row_sum == 5)):
+            return True
+        return False
+
+    @staticmethod
+    def calculate_points(board, marked_board, number):
+        unmarked = np.ma.array(board, mask=marked_board)
+        sum_of_unmarked = unmarked.sum()
+        return int(sum_of_unmarked * number)
+
+    def example_answer(self):
+        return 4512
 
 
-def createBoards(input):
-    boards = []
-    markedBoards = []
-    index = 2
-    while (index < len(input)):
-        board = [x.split(" ") for x in input[index:index+5]]
-        board = [[x for x in line if x] for line in board]
-        boards.append(np.array(board, dtype=int))
-        markedBoards.append(np.zeros([5, 5], dtype=int))
-        index += 6
+class PartB(PartA):
+    def compute(self, data):
+        last_winning_board = np.empty([5, 5])
+        last_winning_marks = np.empty([5, 5])
+        last_number = 0
+        winning_indices = []
 
-    return [boards, markedBoards]
+        for number in data.numbers:
+            for i, (board, marked_board) in enumerate(zip(data.boards, data.marked_boards)):
+                if i in winning_indices:
+                    continue
+                index = np.where(board == number)
+                marked_board[index] = 1
+                winning_board = self.check_winning_condition(marked_board, index)
+                if winning_board:
+                    winning_indices.append(i)
+                    last_winning_board = board
+                    last_winning_marks = marked_board
+                    last_number = number
 
+        return self.calculate_points(last_winning_board, last_winning_marks, last_number)
 
-def checkWinningCodition(markedBoard, markIndex):
-    columnSum = np.sum(markedBoard, axis=0)[markIndex[1]]
-    rowSum = np.sum(markedBoard, axis=1)[markIndex[0]]
-    if ((columnSum.size > 0 and columnSum == 5)
-            or (rowSum.size > 0 and rowSum == 5)):
-        return True
-    return False
-
-
-def calculatePoints(board, markedBoard, number):
-    unmarked = np.ma.array(board, mask=markedBoard)
-    sumOfUnmarked = unmarked.sum()
-    return sumOfUnmarked * number
+    def example_answer(self):
+        return 1924
 
 
-def day04A(input):
-    numbers = np.array(input[0].split(","), dtype=int)
-    [boards, markedBoards] = createBoards(input)
-
-    for number in numbers:
-        for board, markedBoard in zip(boards, markedBoards):
-            index = np.where(board == number)
-            markedBoard[index] = 1
-            winningBoard = checkWinningCodition(markedBoard, index)
-            if (winningBoard):
-                return calculatePoints(board, markedBoard, number)
-
-    return 0
-
-
-def day04B(input):
-    numbers = np.array(input[0].split(","), dtype=int)
-    [boards, markedBoards] = createBoards(input)
-    lastWinningBoard = np.empty([5, 5])
-    lastWinngingMarks = np.empty([5, 5])
-    lastNumber = 0
-    winningIndices = []
-
-    for number in numbers:
-        for i, (board, markedBoard) in enumerate(zip(boards, markedBoards)):
-            if i in winningIndices:
-                continue
-            index = np.where(board == number)
-            markedBoard[index] = 1
-            winningBoard = checkWinningCodition(markedBoard, index)
-            if (winningBoard):
-                winningIndices.append(i)
-                lastWinningBoard = board
-                lastWinngingMarks = markedBoard
-                lastNumber = number
-
-    return calculatePoints(lastWinningBoard, lastWinngingMarks, lastNumber)
-
-
-def main():
-    example = readInputFromFile("day-04/example.txt")
-    input = readInputFromFile("day-04/input.txt")
-
-    print(f'Result example A: {day04A(example)}\n')
-    print(f'Result puzzle data A: {day04A(input)}\n')
-    print(f'Result example B: {day04B(example)}\n')
-    print(f'Result puzzle data B: {day04B(input)}\n')
-
-
-if __name__ == "__main__":
-    main()
+Day.do_day(4, 2021, PartA, PartB)
