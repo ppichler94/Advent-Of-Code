@@ -1,61 +1,39 @@
 import numpy as np
+from mylib.aoc_basics import Day
 
 
-def readInputFromFile(fileName):
-    inputFile = open(fileName, "r")
-    input = inputFile.readlines()
-    input = [x.strip() for x in input]
-    inputFile.close()
-    return input
+class PartA(Day):
+    def parse(self, text, data):
+        population = np.array([int(x) for x in text.split(",")])
+        data.bins = np.array([(population == i).sum() for i in range(10)], dtype=np.longlong)
+
+    def part_config(self, data):
+        data.number_of_days = 80
+
+    def compute(self, data):
+        for _ in range(0, data.number_of_days):
+            self.spawn_new(data)
+            data.bins = np.roll(data.bins, -1)
+        return int(data.bins.sum())
+
+    @staticmethod
+    def spawn_new(data):
+        number_of_zeros = data.bins[0]
+        data.bins[0] = 0
+        data.bins[7] += number_of_zeros
+        data.bins[9] += number_of_zeros
+
+    def example_answer(self):
+        return 5934
 
 
-class Population:
+class PartB(PartA):
+    def part_config(self, data):
+        data.number_of_days = 256
 
-    def __init__(self, input) -> None:
-        population = np.array([int(x) for x in input[0].split(",")])
-        self.bins = np.zeros(10)
-        for i in range(0, 10):
-            self.bins[i] = (population == i).sum()
-
-    def __tick(self):
-        self.bins = np.roll(self.bins, -1)
-
-    def __spawnNew(self):
-        numberOfZeros = self.bins[0]
-        self.bins[0] = 0
-        self.bins[7] += numberOfZeros
-        self.bins[9] += numberOfZeros
-
-    def simulateDays(self, numberOfDays):
-        for day in range(0, numberOfDays):
-            self.__spawnNew()
-            self.__tick()
-
-    def size(self):
-        return self.bins.sum()
+    def example_answer(self):
+        return 26984457539
 
 
-def day06A(input):
-    population = Population(input)
-    population.simulateDays(80)
-    return population.size()
+Day.do_day(6, 2021, PartA, PartB)
 
-
-def day06B(input):
-    population = Population(input)
-    population.simulateDays(256)
-    return population.size()
-
-
-def main():
-    example = readInputFromFile("day-06/example.txt")
-    input = readInputFromFile("day-06/input.txt")
-
-    print(f'Result example A: {day06A(example)}\n')
-    print(f'Result puzzle data A: {day06A(input)}\n')
-    print(f'Result example B: {day06B(example)}\n')
-    print(f'Result puzzle data B: {day06B(input)}\n')
-
-
-if __name__ == "__main__":
-    main()
