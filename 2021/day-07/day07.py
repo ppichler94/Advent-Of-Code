@@ -1,61 +1,47 @@
 import numpy as np
+from mylib.aoc_basics import Day
 
 
-def readInputFromFile(fileName):
-    inputFile = open(fileName, "r")
-    input = inputFile.readlines()
-    input = [x.strip() for x in input]
-    inputFile.close()
-    return input
+class PartA(Day):
+    def parse(self, text, data):
+        data.positions = np.array(text.split(","), dtype=int)
+
+    def part_config(self, data):
+        def cost_function(positions, target):
+            return np.absolute(positions - target).sum()
+
+        data.cost_function = cost_function
+
+    def compute(self, data):
+        minimal_cost = self.calculate_fuel_usage(data)
+        return minimal_cost
+
+    @staticmethod
+    def calculate_fuel_usage(data):
+        min_value = data.positions.min()
+        max_value = data.positions.max()
+        minimal_cost = data.cost_function(data.positions, min_value)
+        for target in range(min_value, max_value):
+            cost = data.cost_function(data.positions, target)
+            if cost < minimal_cost:
+                minimal_cost = cost
+
+        return int(minimal_cost)
+
+    def example_answer(self):
+        return 37
 
 
-def costFunctionA(positions, target):
-    return np.absolute(positions - target).sum()
+class PartB(PartA):
+    def part_config(self, data):
+        def cost_function(positions, target):
+            distance = np.absolute(positions - target)
+            return (distance * (distance + 1) * 0.5).sum()
+
+        data.cost_function = cost_function
+
+    def example_answer(self):
+        return 168
 
 
-def costFunctionB(positions, target):
-    distance = np.absolute(positions - target)
-    return (distance * (distance + 1) * 0.5).sum()
-
-
-def calculateFuelUsage(positions, costFunction):
-    min = positions.min()
-    max = positions.max()
-    minimalCost = costFunction(positions, min)
-    minimalTarget = min
-    for target in range(min, max):
-        cost = costFunction(positions, target)
-        if cost < minimalCost:
-            minimalCost = cost
-            minimalTarget = target
-
-    return [minimalCost, minimalTarget]
-
-
-def day07A(input):
-    positions = np.array(input[0].split(","), dtype=int)
-
-    [minimalCost, minimalTarget] = calculateFuelUsage(positions, costFunctionA)
-
-    return minimalCost
-
-
-def day07B(input):
-    positions = np.array(input[0].split(","), dtype=int)
-
-    [minimalCost, minimalTarget] = calculateFuelUsage(positions, costFunctionB)
-
-    return minimalCost
-
-def main():
-    example = readInputFromFile("day-07/example.txt")
-    input = readInputFromFile("day-07/input.txt")
-
-    print(f'Result example A: {day07A(example)}\n')
-    print(f'Result puzzle data A: {day07A(input)}\n')
-    print(f'Result example B: {day07B(example)}\n')
-    print(f'Result puzzle data B: {day07B(input)}\n')
-
-
-if __name__ == "__main__":
-    main()
+Day.do_day(7, 2021, PartA, PartB)
