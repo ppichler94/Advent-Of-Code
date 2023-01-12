@@ -57,15 +57,15 @@ class Day:
             raise RuntimeError("Class name must start with PartA or PartB")
         return "answer_" + part[-1].lower()
 
-    def parse(self, text, data: Something):
+    def parse(self, text, data):
         data.text = text
 
-    def part_config(self, data: Something):
+    def part_config(self, data):
         # Optional configuration which differs between part a and partb
         pass
 
-    def compute(self, _):
-        return ''
+    def compute(self, data):
+        raise NotImplementedError()
 
     def tests(self):
         return []
@@ -135,7 +135,7 @@ class Day:
     def example_answer(self):
         return None
 
-    def get_example_input(self, puzzle: Puzzle):
+    def get_example_input(self, puzzle):
         return puzzle.example_data
 
     @classmethod
