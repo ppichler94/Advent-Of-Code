@@ -1,61 +1,52 @@
 import numpy as np
-from pathfinding.core.diagonal_movement import DiagonalMovement
-from pathfinding.core.grid import Grid
-from pathfinding.finder.a_star import AStarFinder
+from mylib.aoc_basics import Day
+import nographs as nog
 
 
-def read_input_from_file(file_name):
-    input_file = open(file_name, "r")
-    input = input_file.readlines()
-    input = [x.strip() for x in input]
-    input_file.close()
-    return input
+class PartA(Day):
+    def parse(self, text, data):
+        def risk_at_pos(pos):
+            return data.cave[pos]
+
+        data.cave = nog.Array([[int(x) for x in line] for line in text.splitlines()])
+        data.limits = data.cave.limits()
+        data.moves = nog.Position.moves()
+        data.start = nog.Position.at(0, 0)
+        data.end = nog.Position.at(data.limits[0][1] - 1, data.limits[1][1] - 1)
+        data.risk_at_pos = risk_at_pos
+
+    def compute(self, data):
+        def next_edges(pos: nog.Position, _):
+            for next_pos in pos.neighbors(data.moves, data.limits):
+                yield next_pos, data.risk_at_pos(next_pos)
+
+        def heuristic(pos):
+            return pos.manhattan_distance(data.end)
+
+        traversal = nog.TraversalAStar(next_edges)
+        found = traversal.start_from(heuristic, data.start).go_to(data.end)
+        return traversal.distances[found]
+
+    def example_answer(self):
+        return 40
 
 
-def create_map_a(input):
-    return np.array([[int(x) for x in list(line)] for line in input])
+class PartB(PartA):
+    def part_config(self, data):
+        def risk_at_pos(pos):
+            block_y, y = divmod(pos[0], block_size_y)
+            block_x, x = divmod(pos[1], block_size_x)
+            return (data.cave[(y, x)] + block_x + block_y - 1) % 9 + 1
+
+        block_size_y = data.limits[0][1]
+        block_size_x = data.limits[1][1]
+        data.limits = [(0, block_size_y * 5), (0, block_size_x * 5)]
+        data.end = nog.Position.at(data.limits[0][1] - 1, data.limits[1][1] - 1)
+
+        data.risk_at_pos = risk_at_pos
+
+    def example_answer(self):
+        return 315
 
 
-def create_map_b(input):
-    map_part = np.array([[int(x) for x in list(line)] for line in input])
-    cave_map = np.empty(0)
-    for i in range(0, 5):
-        part = map_part + i
-        part[part > 9] -= 9
-        line_map = np.array(part)
-        for j in range(1, 5):
-            part = map_part + i + j
-            part[part > 9] -= 9
-            line_map = np.concatenate((line_map, part), axis=1)
-        if i == 0:
-            cave_map = line_map
-        else:
-            cave_map = np.concatenate((cave_map, line_map), axis=0)
-
-    return cave_map
-
-
-def run(input, create_map_function):
-    cave_map = create_map_function(input)
-    grid = Grid(matrix=cave_map)
-    start = grid.node(0, 0)
-    end = grid.node(len(cave_map) - 1, len(cave_map) - 1)
-
-    finder = AStarFinder(diagonal_movement=DiagonalMovement.never)
-    path, _ = finder.find_path(start, end, grid)
-    risk = sum(cave_map[x[1]][x[0]] for x in path[1:])
-    return risk
-
-
-def main():
-    example = read_input_from_file("day-15/example.txt")
-    input = read_input_from_file("day-15/input.txt")
-
-    print(f'Result example A: {run(example, create_map_a)}\n')
-    print(f'Result puzzle data A: {run(input, create_map_a)}\n')
-    print(f'Result example B: {run(example, create_map_b)}\n')
-    print(f'Result puzzle data B: {run(input, create_map_b)}\n')
-
-
-if __name__ == "__main__":
-    main()
+Day.do_day(15, 2021, PartA, PartB)
