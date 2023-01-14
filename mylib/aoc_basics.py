@@ -1,7 +1,6 @@
 import sys
 import timeit
 from aocd.models import Puzzle
-from typing import Self
 
 
 def submit(puzzle: Puzzle, answer: str, value):
@@ -100,9 +99,9 @@ class Day:
         default = "\033[00m"
         test_name = "" if len(more) == 0 else f"'{more[0]}'"
         result = self.__test_solve(text, more[1:])
-        if not result_ok:
+        if result_ok is None:
             print(f"{yellow}  >> Test result is not checked{default}")
-        if result == result_ok or not result_ok:
+        if result == result_ok or result_ok is None:
             print(f"  {green}>>{default} Test {test_name} {green}OK{default}  Result: {result}")
             return True
         else:
