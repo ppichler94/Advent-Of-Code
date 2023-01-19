@@ -1,13 +1,14 @@
 [tool.poetry]
 name = "advent_of_code"
 version = "0.1.0"
+description = "Advent of Code challenges"
 authors = ["Patrick Pichler <ppichler@outlook.at>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 advent-of-code-data = "^1.3.2"
 numpy = "^1.23.0"
-nogrpahs = "^3.0.1"
+nographs = "^3.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
