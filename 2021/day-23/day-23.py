@@ -16,59 +16,29 @@ class PartA(Day):
     def compute(self, data):
         def next_edges(state, _):
             hallway, rooms = state
-            # rooms = ((Front, Back), (Front, Back), ...)
-            #          A               B
 
             hallway_pods = [(pod, i) for i, pod in enumerate(hallway) if pod]
             for pod, i in hallway_pods:
-                if next_rooms := move_to_room(hallway_pods, rooms, i, pod):
-                    next_hallway = tuple(p if i != j else None for j, p in enumerate(hallway))
-                    steps = abs((2 + 2 * data.room_index[pod]) - i)
-                    steps += 2 if next_rooms[data.room_index[pod]][0] is None else 1
-                    yield (next_hallway, next_rooms), data.cost[pod] * steps
+                if result := self.move_hallway_to_room(data, hallway, rooms, (0, i)):
+                    next_rooms, next_hallway, cost = result
+                    yield (next_hallway, next_rooms), cost
                     return
 
-            for pod, i in [(front if front else back, i) for i, (front, back) in enumerate(rooms) if front or back]:
-                if i == data.room_index[pod] and (rooms[i][1] == pod or rooms[i][0] == pod and rooms[i][1] == pod):
+            for pod, room_x, room_y in self.iterate_rooms(rooms):
+                if not any(x != pod for x in rooms[room_x] if x):
                     continue
-                if next_rooms := move_to_room(hallway_pods, rooms, 2 + 2 * i, pod):
-                    room = rooms[i]
-                    next_room = (None, None) if room[0] is None else (None, room[1])
-                    next_rooms = tuple(r if i != j else next_room for j, r in enumerate(next_rooms))
-                    steps = abs((2 + 2 * i) - (2 + 2 * data.room_index[pod]))
-                    steps += 2 if room[0] is None else 1
-                    steps += 2 if rooms[data.room_index[pod]][1] is None else 1
-                    yield (hallway, next_rooms), data.cost[pod] * steps
+                if result := self.move_room_to_room(data, hallway, rooms, (room_y, 2 + 2 * room_x)):
+                    next_rooms, next_hallway, cost = result
+                    yield (next_hallway, next_rooms), cost
                     return
 
-            for pod, room_idx in [(front if front is not None else back, room_idx) for room_idx, (front, back) in enumerate(rooms) if front or back]:
+            for pod, room_x, room_y in self.iterate_rooms(rooms):
                 for target in data.valid_hallway_pos:
-                    pos = 2 + 2 * room_idx
-                    if next_hallway := move_to_hallway(hallway, pod, pos, target):
-                        room = rooms[room_idx]
-                        next_room = (None, None) if room[0] is None else (None, room[1])
-                        next_rooms = tuple(r if i != room_idx else next_room for i, r in enumerate(rooms))
-                        steps = abs(pos - target)
-                        steps += 2 if room[0] is None else 1
-                        yield (next_hallway, next_rooms), data.cost[pod] * steps
-
-        def move_to_room(hallway_pods, rooms, pos, pod):
-            target = 2 + 2 * data.room_index[pod]
-            low, high = (pos, target) if pos < target else (target, pos)
-            if any(x in [i for pod, i in hallway_pods if i != pos] for x in list(range(low, high))):
-                return None
-            room = rooms[data.room_index[pod]]
-            if room[1] is None:
-                return tuple(x if i != data.room_index[pod] else (None, pod) for i, x in enumerate(rooms))
-            if room[0] is None and room[1] == pod:
-                return tuple(x if i != data.room_index[pod] else (pod, pod) for i, x in enumerate(rooms))
-            return None
-
-        def move_to_hallway(hallway, pod, pos, target):
-            low, high = (pos, target + 1) if pos < target else (target, pos + 1)
-            if any(x is not None for x in hallway[low:high]):
-                return None
-            return tuple(x if i != target else pod for i, x in enumerate(hallway))
+                    pos = 2 + 2 * room_x
+                    start = (room_y, pos)
+                    if result := self.move_room_to_hallway(data, hallway, rooms, start, (0, target)):
+                        next_rooms, next_hallway, cost = result
+                        yield (next_hallway, next_rooms), cost
 
         traversal = nog.TraversalShortestPaths(next_edges)
         for state in traversal.start_from((tuple([None] * 11), data.start_rooms)):
@@ -76,6 +46,68 @@ class PartA(Day):
             if rooms == data.end_rooms:
                 return traversal.distance
         return "No result"
+
+    @staticmethod
+    def iterate_rooms(rooms):
+        for room_x, room in enumerate(rooms):
+            for room_y, pod in enumerate(room):
+                if pod:
+                    yield pod, room_x, room_y + 1
+                    break
+
+    def move_hallway_to_room(self, data, hallway, rooms, start):
+        pod = hallway[start[1]]
+        room_id = data.room_index[pod]
+        end = (0, 2 + 2 * room_id)
+        if self.hallway_blocked(hallway, start[1], end[1]):
+            return None
+        room = rooms[room_id]
+        if any(x != pod for x in room if x):
+            return None
+        end_y = len(room) - list(reversed(room)).index(None) - 1
+        next_room = tuple([None] * end_y + [pod] * (len(room) - end_y))
+        next_rooms = tuple(x if i != room_id else next_room for i, x in enumerate(rooms))
+        next_hallway = tuple(x if i != start[1] else None for i, x in enumerate(hallway))
+        return next_rooms, next_hallway, self.calculate_cost(data.cost[pod], start, (end_y + 1, end[1]))
+
+    def move_room_to_room(self, data, hallway, rooms, start):
+        start_room_id = (start[1] - 2) // 2
+        pod = rooms[start_room_id][start[0] - 1]
+        end_room_id = data.room_index[pod]
+        end = (0, 2 + 2 * end_room_id)
+        if self.hallway_blocked(hallway, start[1], end[1]):
+            return None
+        end_room = rooms[end_room_id]
+        if any(x != pod for x in end_room if x):
+            return None
+        end_y = len(end_room) - list(reversed(end_room)).index(None) - 1
+        next_end_room = tuple([None] * end_y + [pod] * (len(end_room) - end_y))
+        next_start_room = tuple([None] * (start[0]) + list(rooms[start_room_id][(start[0]) :]))
+        next_rooms = tuple(
+            next_end_room if i == end_room_id else next_start_room if i == start_room_id else x
+            for i, x in enumerate(rooms)
+        )
+        return next_rooms, hallway, self.calculate_cost(data.cost[pod], start, (end_y + 1, end[1]))
+
+    def move_room_to_hallway(self, data, hallway, rooms, start, end):
+        if self.hallway_blocked(hallway, start[1], end[1]):
+            return None
+        room_id = (start[1] - 2) // 2
+        pod = rooms[room_id][start[0] - 1]
+        next_hallway = tuple(x if i != end[1] else pod for i, x in enumerate(hallway))
+        next_room = tuple([None] * (start[0]) + list(rooms[room_id][start[0] :]))
+        next_rooms = tuple(x if i != room_id else next_room for i, x in enumerate(rooms))
+        return next_rooms, next_hallway, self.calculate_cost(data.cost[pod], start, end)
+
+    @staticmethod
+    def hallway_blocked(hallway, start, end):
+        low, high = (start + 1, end) if start < end else (end + 1, start)
+        return any(x is not None for x in hallway[low:high])
+
+    @staticmethod
+    def calculate_cost(cost, start, end):
+        return cost * (start[0] + end[0] + abs(start[1] - end[1]))
+
 
     def example_answer(self):
         return 12521
