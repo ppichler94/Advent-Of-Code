@@ -81,7 +81,10 @@ class Day:
         print("Starting test...")
         t = timeit.default_timer()
         passed_tests = 0
-        tests = [(self.get_example_input(puzzle), self.example_answer(), "Example", "example run")]
+        if self.get_example_input(puzzle):
+            tests = [(self.get_example_input(puzzle), self.example_answer(), "Example", "example run")]
+        else:
+            tests = []
         tests.extend(self.tests())
         for text, result_ok, *more in tests:
             passed = self.__execute_test(text, result_ok, more)
