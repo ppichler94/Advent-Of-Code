@@ -1,3 +1,4 @@
+import functools
 import re
 from mylib.aoc_basics import Day
 import nographs as nog

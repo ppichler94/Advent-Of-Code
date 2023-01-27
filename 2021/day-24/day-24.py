@@ -31,8 +31,7 @@ class PartA(Day):
 
         def run_block(z, w, digit_index):
             p1, p2, p3 = block_parameters[digit_index]
-            _, x = divmod(z, 26)
-            x += p2
+            x = (z % 26) + p2
             z = z // p1
             if x != w:
                 z = 26 * z + w + p3
