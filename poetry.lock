@@ -26,14 +26,14 @@ nb = ["IPython", "jupyter-server"]
 
 [[package]]
 name = "beautifulsoup4"
-version = "4.11.1"
+version = "4.11.2"
 description = "Screen-scraping library"
 category = "main"
 optional = false
 python-versions = ">=3.6.0"
 files = [
-    {file = "beautifulsoup4-4.11.1-py3-none-any.whl", hash = "sha256:58d5c3d29f5a36ffeb94f02f0d786cd53014cf9b3b3951d42e0080d8a9498d30"},
-    {file = "beautifulsoup4-4.11.1.tar.gz", hash = "sha256:ad9aa55b65ef2808eb405f46cf74df7fcb7044d5cbc26487f96eb2ef2e436693"},
+    {file = "beautifulsoup4-4.11.2-py3-none-any.whl", hash = "sha256:0e79446b10b3ecb499c1556f7e228a53e64a2bfcebd455f370d8927cb5b59e39"},
+    {file = "beautifulsoup4-4.11.2.tar.gz", hash = "sha256:bc4bdda6717de5a2987436fb8d72f45dc90dd856bdfd512a1314ce90349a0106"},
 ]
 
 [package.dependencies]
@@ -179,14 +179,14 @@ files = [
 
 [[package]]
 name = "nographs"
-version = "3.0.1"
+version = "3.0.2"
 description = "Graph analysis – the lazy (evaluation) way: Analysis on the fly, for graphs, that are computed and/or adapted on the fly."
 category = "main"
 optional = false
 python-versions = ">=3.9, <4"
 files = [
-    {file = "nographs-3.0.1-py3-none-any.whl", hash = "sha256:9ac936fd464cc0cfbacdd15e3564360897b40caf0663d8a64860d6fb2b0f02ac"},
-    {file = "nographs-3.0.1.tar.gz", hash = "sha256:5699b39d524a06ff3107e4b2c2a74d8467597cdebc22a38a787187b1182a6da7"},
+    {file = "nographs-3.0.2-py3-none-any.whl", hash = "sha256:88c5ed05958a1c24c9724a64d63342835ede9092adf7fd4d4f18612f9b1cb39f"},
+    {file = "nographs-3.0.2.tar.gz", hash = "sha256:866041da8e08c98789e4d1e028a3c140f0bf90b76fa4f41c9a236d999ea04651"},
 ]
 
 [[package]]
@@ -238,6 +238,21 @@ files = [
     {file = "Pebble-5.0.3-py3-none-any.whl", hash = "sha256:8274aa0959f387b368ede47666129cbe5d123f276a1bd9cafe77e020194b2141"},
     {file = "Pebble-5.0.3.tar.gz", hash = "sha256:bdcfd9ea7e0aedb895b204177c19e6d6543d9962f4e3402ebab2175004863da8"},
 ]
+
+[[package]]
+name = "pyparsing"
+version = "3.0.9"
+description = "pyparsing module - Classes and methods to define and execute parsing grammars"
+category = "main"
+optional = false
+python-versions = ">=3.6.8"
+files = [
+    {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
+    {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
+]
+
+[package.extras]
+diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "python-dateutil"
@@ -382,4 +397,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "4bd12e5af2e405502e9569c01f75e3a82e2e28cdde8f001e982a0b6d33731505"
+content-hash = "3e32e230a7a59f6c55575061bd1315329a361f0d19782007644f79d593cc4844"
