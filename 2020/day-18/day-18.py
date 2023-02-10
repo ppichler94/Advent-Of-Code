@@ -1,39 +1,34 @@
-import operator
+from operator import add, mul
 from mylib.aoc_basics import Day
 import pyparsing
 
 
 class PartA(Day):
-    def __init__(self):
-        self.stack = []
-        integer = pyparsing.Word(pyparsing.nums).setParseAction(self.add_to_stack)
+    def part_config(self, data):
+        integer = pyparsing.Word(pyparsing.nums)
         op = pyparsing.one_of("+ *")
-        left_par, right_par = map(pyparsing.Suppress, "()")
+        data.expr = pyparsing.infix_notation(
+            integer, [(op, 2, pyparsing.opAssoc.LEFT, self.action)], lpar="(", rpar=")"
+        )
 
-        expr = pyparsing.Forward()
-        atom = integer | pyparsing.Group(left_par + expr + right_par)
-        expr <<= atom + (op + atom).setParseAction(self.add_to_stack)[...]
-        self.expr = expr
+    @staticmethod
+    def action(tokens):
+        terms = tokens[0]
+        while len(terms) >= 3:
+            left = int(terms.pop(0))
+            op = terms.pop(0)
+            right = int(terms.pop(0))
+            result = {"+": add, "*": mul}[op](left, right)
+            terms.insert(0, str(result))
+        return terms[0]
 
     def compute(self, data):
-        return sum(self.evaluate_line(line) for line in data.text.splitlines())
+        return sum(self.evaluate_line(data, line) for line in data.text.splitlines())
 
-    def evaluate_line(self, line):
-        self.stack[:] = []
-        self.expr.parseString(line, parse_all=True)
-        return self.evaluate_stack(self.stack[::-1])
-
-    def add_to_stack(self, results: pyparsing.ParseResults):
-        self.stack.append(results[0])
-
-    def evaluate_stack(self, stack):
-        next_element = stack.pop(0)
-        if next_element in ["+", "*"]:
-            operand2 = self.evaluate_stack(stack)
-            operand1 = self.evaluate_stack(stack)
-            return {"+": operator.add, "*": operator.mul}[next_element](operand1, operand2)
-        else:
-            return int(next_element)
+    @staticmethod
+    def evaluate_line(data, line):
+        result = data.expr.parseString(line, parse_all=True)
+        return int(result[0])
 
     def example_answer(self):
         return 71
@@ -49,16 +44,17 @@ class PartA(Day):
 
 
 class PartB(PartA):
-    def __init__(self):
-        self.stack = []
-        integer = pyparsing.Word(pyparsing.nums).setParseAction(self.add_to_stack)
-        left_par, right_par = map(pyparsing.Suppress, "()")
-
-        expr = pyparsing.Forward()
-        atom = integer | pyparsing.Group(left_par + expr + right_par)
-        term = atom + ("+" + atom).setParseAction(self.add_to_stack)[...]
-        expr <<= term + ("*" + term).setParseAction(self.add_to_stack)[...]
-        self.expr = expr
+    def part_config(self, data):
+        integer = pyparsing.Word(pyparsing.nums)
+        data.expr = pyparsing.infix_notation(
+            integer,
+            [
+                ("+", 2, pyparsing.opAssoc.LEFT, self.action),
+                ("*", 2, pyparsing.opAssoc.LEFT, self.action),
+            ],
+            lpar="(",
+            rpar=")",
+        )
 
     def example_answer(self):
         return 231
