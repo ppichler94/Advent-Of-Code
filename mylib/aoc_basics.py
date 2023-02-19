@@ -1,18 +1,20 @@
 import sys
 import timeit
 from aocd.models import Puzzle
+from rich import print
+from rich.console import Console
+from rich.progress import Progress
 
 
 def submit(puzzle: Puzzle, answer: str, value):
-    green = "\033[0;32m"
-    yellow = "\033[0;33m"
-    red = "\033[0;31m"
-    default = "\033[00m"
+    def print_result(result):
+        if result:
+            print(f"  >> [green](Already answered, values match)[/green]")
+        else:
+            print(f"  >> [red]Value differs from previous:[/red] ", puzzle.answer_b)
 
-    print()
-    print("  >>", answer, ": ", value)
     if answer not in ("answer_a", "answer_b"):
-        print(f"{yellow}Answer ignored:{default} answer does not match answer_a or answer_b")
+        print(f":warning: [yellow]Answer ignored:[/yellow] answer does not match answer_a or answer_b")
         return
 
     if type(value) == int:
@@ -20,21 +22,15 @@ def submit(puzzle: Puzzle, answer: str, value):
     elif type(value) == str:
         value_str = value
     else:
-        print(f"{yellow}Answer ignored:{default} value type is neither int nor string")
+        print(f":warning: [yellow]Answer ignored:[/yellow] value type is neither int nor string")
         return
 
     if answer == "answer_a" and puzzle.answered_a:
-        if value_str == puzzle.answer_a:
-            print(f"{green}  >> Ok {default}(Already answered, values match)")
-        else:
-            print(f"{red}  >> Fail {default}Value differs from previous: ", puzzle.answer_a)
+        print_result(value_str == puzzle.answer_a)
         return
 
     if answer == "answer_b" and puzzle.answered_b:
-        if value_str == puzzle.answer_b:
-            print(f"{green}  >> Ok {default}(Already answered, values match)")
-        else:
-            print(f"{red}  >> Fail {default}Value differs from previous: ", puzzle.answer_b)
+        print_result(value_str == puzzle.answer_b)
         return
 
     print("Submit answer? (y/n)")
@@ -60,7 +56,7 @@ class Day:
         data.text = text
 
     def part_config(self, data):
-        # Optional configuration which differs between part a and partb
+        # Optional configuration which differs between part a and part b
         pass
 
     def compute(self, data):
@@ -69,69 +65,39 @@ class Day:
     def tests(self):
         return []
 
-    def __test_solve(self, test_text: str, config=None):
-        data = Something()
-        data.config = config
-        self.parse(test_text.strip("\n"), data)
-        self.part_config(data)
-        result = self.compute(data)
-        return result
-
     def __test(self, puzzle: Puzzle):
         print("Starting test...")
-        t = timeit.default_timer()
-        passed_tests = 0
+        tests = self.__get_all_tests(puzzle)
+        test_tasks = [Task(self, more[0], text.strip("\n"), target, more[1:]) for text, target, *more in tests]
+        with Progress() as progress:
+            task = progress.add_task("Tests...", total=len(tests))
+            for test in test_tasks:
+                test.execute()
+                progress.update(task, advance=1)
+            passed_tests = sum(1 if task.passed else 0 for task in test_tasks)
+            runtime = sum(task.t for task in test_tasks)
+            print(f"Testing finished after {runtime:.2f}s")
+            print(f"{passed_tests} of {len(tests)} passed")
+        print("")
+        return passed_tests == len(tests)
+
+    def __get_all_tests(self, puzzle: Puzzle):
         if self.get_example_input(puzzle):
             tests = [(self.get_example_input(puzzle), self.example_answer(), "Example", "example run")]
         else:
             tests = []
         tests.extend(self.tests())
-        for text, result_ok, *more in tests:
-            passed = self.__execute_test(text, result_ok, more)
-            if passed:
-                passed_tests += 1
-        print(f"Testing finished after {timeit.default_timer() - t:.2f}s")
-        print(f"{passed_tests} of {len(tests)} passed")
-        print("")
-        return passed_tests == len(tests)
-
-    def __execute_test(self, text: str, result_ok, more):
-        green = "\033[0;32m"
-        yellow = "\033[0;33m"
-        red = "\033[0;31m"
-        default = "\033[00m"
-        test_name = "" if len(more) == 0 else f"'{more[0]}'"
-        result = self.__test_solve(text, more[1:])
-        if result_ok is None:
-            print(f"{yellow}  >> Test result is not checked{default}")
-        if result == result_ok or result_ok is None:
-            print(f"  {green}>>{default} Test {test_name} {green}OK{default}  Result: {result}")
-            return True
-        else:
-            print(f"  {red}>>{default}  Test {test_name} {red}Failed{default}")
-            print(f"  !! Expected {result_ok} but got {result}")
-            return False
-
-    def __do_solve(self, puzzle_text: str):
-        print("Starting to solve...")
-        t = timeit.default_timer()
-        data = Something()
-        data.config = None
-        print("Parse input")
-        self.parse(puzzle_text, data)
-        print("Config")
-        self.part_config(data)
-        print("Compute")
-        result = self.compute(data)
-        print(f"Finished solving after {timeit.default_timer() - t:.2f}s")
-        return result
+        return tests
 
     def do_part(self, puzzle: Puzzle):
-        print(f"-------------------- starting {self.__answer_name()} --------------------")
-        if self.__test(puzzle):
+        console = Console()
+        console.rule(f"starting {self.__answer_name()}")
+        test_successful = self.__test(puzzle)
+        if test_successful:
             text = puzzle.input_data
-            result = self.__do_solve(text)
-            submit(puzzle, self.__answer_name(), result)
+            task = Task(self, "Part", text, None, None)
+            task.execute()
+            submit(puzzle, self.__answer_name(), task.result)
         print()
 
     def example_answer(self):
@@ -147,3 +113,34 @@ class Day:
             part_a().do_part(puzzle)
         if part_b:
             part_b().do_part(puzzle)
+
+
+class Task:
+    def __init__(self, day: Day, name, input_text, target_result, config):
+        self.day = day
+        self.name = name
+        self.input_text = input_text
+        self.target_result = target_result
+        self.config = config
+        self.result = None
+        self.passed = False
+
+    def execute(self):
+        self.__solve()
+        if self.target_result is None:
+            print(f"[yellow]  >> Task result is not checked[/yellow]")
+        if self.result == self.target_result or self.target_result is None:
+            print(f"  [green]>>[/green] Task {self.name} [green bold]OK[/green bold]  Result: {self.result} Runtime: {self.t:.2f}")
+            self.passed = True
+        else:
+            print(f"  [red]>>[/red]  Task {self.name} [red bold]Failed[/red bold] Result: {self.result} Expected: {self.target_result} Runtime: {self.t:.2f}")
+            self.passed = False
+
+    def __solve(self):
+        t = timeit.default_timer()
+        data = Something()
+        data.config = self.config
+        self.day.parse(self.input_text, data)
+        self.day.part_config(data)
+        self.result = self.day.compute(data)
+        self.t = timeit.default_timer() - t
