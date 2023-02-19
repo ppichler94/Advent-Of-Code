@@ -95,7 +95,7 @@ class Day:
         test_successful = self.__test(puzzle)
         if test_successful:
             text = puzzle.input_data
-            task = Task(self, "Part", text, None, None)
+            task = Task(self, "Answer", text, None, None)
             task.execute()
             submit(puzzle, self.__answer_name(), task.result)
         print()
@@ -128,12 +128,13 @@ class Task:
     def execute(self):
         self.__solve()
         if self.target_result is None:
-            print(f"[yellow]  >> Task result is not checked[/yellow]")
-        if self.result == self.target_result or self.target_result is None:
-            print(f"  [green]>>[/green] Task {self.name} [green bold]OK[/green bold]  Result: {self.result} Runtime: {self.t:.2f}")
+            print(f"  [yellow]>>[/yellow] Task '{self.name}' [yellow bold]unchecked[/yellow bold]  Result: {self.result} Runtime: {self.t:.2f}s")
+            self.passed = True
+        elif self.result == self.target_result:
+            print(f"  [green]>>[/green] Task '{self.name}' [green bold]OK[/green bold]  Result: {self.result} Runtime: {self.t:.2f}s")
             self.passed = True
         else:
-            print(f"  [red]>>[/red]  Task {self.name} [red bold]Failed[/red bold] Result: {self.result} Expected: {self.target_result} Runtime: {self.t:.2f}")
+            print(f"  [red]>>[/red]  Task '{self.name}' [red bold]failed[/red bold] Result: {self.result} Expected: {self.target_result} Runtime: {self.t:.2f}s")
             self.passed = False
 
     def __solve(self):
