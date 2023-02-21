@@ -63,6 +63,16 @@ class Day:
         raise NotImplementedError()
 
     def tests(self):
+        """
+        Create a list of tests to run
+
+        Each list entry must be a tuple containing:
+         * input
+         * target
+         * Name (optional)
+         * Config (optional)
+        :return:
+        """
         return []
 
     def __test(self, puzzle: Puzzle):
@@ -128,13 +138,23 @@ class Task:
     def execute(self):
         self.__solve()
         if self.target_result is None:
-            print(f"  [yellow]>>[/yellow] Task '{self.name}' [yellow bold]unchecked[/yellow bold]  Result: {self.result} Runtime: {self.t:.2f}s")
+            print(
+                f"  [yellow]>>[/yellow] Task '{self.name}' [yellow bold]unchecked[/yellow bold] ",
+                f"Result: {self.result} Runtime: {self.t:.2f}s",
+            )
             self.passed = True
         elif self.result == self.target_result:
-            print(f"  [green]>>[/green] Task '{self.name}' [green bold]OK[/green bold]  Result: {self.result} Runtime: {self.t:.2f}s")
+            print(
+                f"  [green]>>[/green] Task '{self.name}' [green bold]OK[/green bold] ",
+                f"Result: {self.result} Runtime: {self.t:.2f}s",
+            )
             self.passed = True
         else:
-            print(f"  [red]>>[/red]  Task '{self.name}' [red bold]failed[/red bold] Result: {self.result} Expected: {self.target_result} Runtime: {self.t:.2f}s")
+            print(
+                f"  [red]>>[/red]  Task '{self.name}' [red bold]failed[/red bold] ",
+                f"Expected: {self.target_result} ",
+                f"Result: {self.result} Runtime: {self.t:.2f}s",
+            )
             self.passed = False
 
     def __solve(self):
