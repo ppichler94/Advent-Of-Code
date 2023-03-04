@@ -12,52 +12,42 @@ class PartA(Day):
         pc = 0
         while True:
             instruction = program[pc]
-            opcode, mode1, mode2 = self.decode_instruction(instruction)
+            opcode, modes = self.decode_instruction(instruction)
             match opcode:
                 case 1:
-                    param1 = self.get_parameter(program, program[pc + 1], mode1)
-                    param2 = self.get_parameter(program, program[pc + 2], mode2)
-                    param3 = program[pc + 3]
-                    program[param3] = param1 + param2
+                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    program[params[2]] = params[0] + params[1]
                     pc += 4
                 case 2:
-                    param1 = self.get_parameter(program, program[pc + 1], mode1)
-                    param2 = self.get_parameter(program, program[pc + 2], mode2)
-                    param3 = program[pc + 3]
-                    program[param3] = param1 * param2
+                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    program[params[2]] = params[0] * params[1]
                     pc += 4
                 case 3:
                     program[program[pc + 1]] = input_parameter
                     pc += 2
                 case 4:
-                    param = self.get_parameter(program, program[pc + 1], mode1)
+                    param = self.get_parameters(program, pc + 1, 1, modes)[0]
                     output_parameter = param
                     pc += 2
                 case 5:
-                    param1 = self.get_parameter(program, program[pc + 1], mode1)
-                    param2 = self.get_parameter(program, program[pc + 2], mode2)
-                    if param1 != 0:
-                        pc = param2
+                    params = self.get_parameters(program, pc + 1, 2, modes)
+                    if params[0] != 0:
+                        pc = params[1]
                     else:
                         pc += 3
                 case 6:
-                    param1 = self.get_parameter(program, program[pc + 1], mode1)
-                    param2 = self.get_parameter(program, program[pc + 2], mode2)
-                    if param1 == 0:
-                        pc = param2
+                    params = self.get_parameters(program, pc + 1, 2, modes)
+                    if params[0] == 0:
+                        pc = params[1]
                     else:
                         pc += 3
                 case 7:
-                    param1 = self.get_parameter(program, program[pc + 1], mode1)
-                    param2 = self.get_parameter(program, program[pc + 2], mode2)
-                    param3 = program[pc + 3]
-                    program[param3] = 1 if param1 < param2 else 0
+                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    program[params[2]] = 1 if params[0] < params[1] else 0
                     pc += 4
                 case 8:
-                    param1 = self.get_parameter(program, program[pc + 1], mode1)
-                    param2 = self.get_parameter(program, program[pc + 2], mode2)
-                    param3 = program[pc + 3]
-                    program[param3] = 1 if param1 == param2 else 0
+                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    program[params[2]] = 1 if params[0] == params[1] else 0
                     pc += 4
                 case 99:
                     break
@@ -71,14 +61,11 @@ class PartA(Day):
         opcode = instruction % 100
         mode1 = instruction // 100 % 10
         mode2 = instruction // 1000 % 10
-        return opcode, mode1, mode2
+        return opcode, [mode1, mode2, 1]
 
     @staticmethod
-    def get_parameter(program, value, mode):
-        if mode == 0:
-            return program[value]
-        else:
-            return value
+    def get_parameters(program, start, count, modes):
+        return [program[program[start + i]] if modes[i] == 0 else program[start + i] for i in range(count)]
 
     def example_answer(self):
         return 1
