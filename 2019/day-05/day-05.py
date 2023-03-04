@@ -1,52 +1,50 @@
 from mylib.aoc_basics import Day
 
 
-class PartA(Day):
-    def parse(self, text, data):
-        data.program = [int(x) for x in text.split(",")]
+class Computer:
+    def __init__(self, program):
+        self.program = program
 
-    def compute(self, data):
-        return self.execute_program(data.program, 1)
-
-    def execute_program(self, program, input_parameter):
+    def execute_program(self, input_parameter):
         pc = 0
+        program = list(self.program)
         while True:
             instruction = program[pc]
-            opcode, modes = self.decode_instruction(instruction)
+            opcode, modes = self.__decode_instruction(instruction)
             match opcode:
                 case 1:
-                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    params = self.__get_parameters(program, pc + 1, 3, modes)
                     program[params[2]] = params[0] + params[1]
                     pc += 4
                 case 2:
-                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    params = self.__get_parameters(program, pc + 1, 3, modes)
                     program[params[2]] = params[0] * params[1]
                     pc += 4
                 case 3:
                     program[program[pc + 1]] = input_parameter
                     pc += 2
                 case 4:
-                    param = self.get_parameters(program, pc + 1, 1, modes)[0]
+                    param = self.__get_parameters(program, pc + 1, 1, modes)[0]
                     output_parameter = param
                     pc += 2
                 case 5:
-                    params = self.get_parameters(program, pc + 1, 2, modes)
+                    params = self.__get_parameters(program, pc + 1, 2, modes)
                     if params[0] != 0:
                         pc = params[1]
                     else:
                         pc += 3
                 case 6:
-                    params = self.get_parameters(program, pc + 1, 2, modes)
+                    params = self.__get_parameters(program, pc + 1, 2, modes)
                     if params[0] == 0:
                         pc = params[1]
                     else:
                         pc += 3
                 case 7:
-                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    params = self.__get_parameters(program, pc + 1, 3, modes)
                     program[params[2]] = 1 if params[0] < params[1] else 0
                     pc += 4
                 case 8:
-                    params = self.get_parameters(program, pc + 1, 3, modes)
+                    params = self.__get_parameters(program, pc + 1, 3, modes)
                     program[params[2]] = 1 if params[0] == params[1] else 0
                     pc += 4
                 case 99:
@@ -57,15 +55,23 @@ class PartA(Day):
         return output_parameter
 
     @staticmethod
-    def decode_instruction(instruction):
+    def __decode_instruction(instruction):
         opcode = instruction % 100
         mode1 = instruction // 100 % 10
         mode2 = instruction // 1000 % 10
         return opcode, [mode1, mode2, 1]
 
     @staticmethod
-    def get_parameters(program, start, count, modes):
+    def __get_parameters(program, start, count, modes):
         return [program[program[start + i]] if modes[i] == 0 else program[start + i] for i in range(count)]
+
+
+class PartA(Day):
+    def parse(self, text, data):
+        data.program = [int(x) for x in text.split(",")]
+
+    def compute(self, data):
+        return Computer(data.program).execute_program(1)
 
     def example_answer(self):
         return 1
@@ -76,7 +82,7 @@ class PartA(Day):
 
 class PartB(PartA):
     def compute(self, data):
-        return self.execute_program(data.program, 5)
+        return Computer(data.program).execute_program(5)
 
     def example_answer(self):
         return 999
